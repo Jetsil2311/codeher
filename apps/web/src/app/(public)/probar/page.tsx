@@ -8,7 +8,7 @@ import { publicLessons } from "@/server/services/public";
 export const dynamic = "force-dynamic";
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations("landing.probarPage");
-  return { title: t("title") + " " + t("titleAccent") };
+  return { title: t("title") + " " + t("titleAccent"), description: t("subtitle"), alternates: { canonical: "/probar" } };
 }
 
 export default async function Probar({ searchParams }: { searchParams: Promise<{ lenguaje?: string }> }) {

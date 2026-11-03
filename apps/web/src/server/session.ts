@@ -15,10 +15,17 @@ export async function clientIp(): Promise<string | null> {
   return h.get("x-forwarded-for")?.split(",")[0]?.trim() || h.get("x-real-ip") || "local";
 }
 
+// Stateless tokens: kind~subject~expiry~secretVersion~nonce, HMAC-signed in the cookie.
+// They work across server instances. The secret version is derived from the PIN or
+// password hash, so a PIN reset ends every existing session of that student.
+function secretVersion(db: Db, kind: "student" | "staff", subjectId: string): string | null {
+  const h = kind === "student" ? db.students.find((x) => x.id === subjectId)?.pin_hash : db.profiles.find((x) => x.id === subjectId)?.password_hash;
+  return h ? sha256(h).slice(0, 12) : null;
+}
+
 export function issueSession(db: Db, kind: "student" | "staff", subjectId: string, hours: number): string {
-  const token = randomToken();
-  db.sessions.push({ id: crypto.randomUUID(), kind, subject_id: subjectId, token_hash: sha256(token), created_at: now(), expires_at: new Date(Date.now() + hours * 3600_000).toISOString(), revoked_at: null });
-  return token;
+  const exp = Date.now() + hours * 3600_000;
+  return [kind, subjectId, exp, secretVersion(db, kind, subjectId) ?? "x", randomToken(8)].join("~");
 }
 
 export async function setSessionCookie(name: string, token: string, hours: number) {
@@ -30,21 +37,22 @@ export async function clearSession(name: string) {
   const jar = await cookies();
   const token = unsign(jar.get(name)?.value);
   if (token) {
-    const h = sha256(token);
+    const [kind, subject] = token.split("~");
     write((db) => {
-      const s = db.sessions.find((x) => x.token_hash === h);
-      if (s) s.revoked_at = now();
+      db.sessions.push({ id: crypto.randomUUID(), kind: kind === "staff" ? "staff" : "student", subject_id: subject ?? "", token_hash: sha256(token), created_at: now(), expires_at: now(), revoked_at: now() });
+      if (db.sessions.length > 500) db.sessions = db.sessions.slice(-500);
     });
   }
   jar.delete(name);
 }
 
-function findSession(db: Db, kind: "student" | "staff", token: string | null) {
+function findSession(db: Db, kind: "student" | "staff", token: string | null): { subject_id: string } | null {
   if (!token) return null;
-  const h = sha256(token);
-  const s = db.sessions.find((x) => x.token_hash === h && x.kind === kind && !x.revoked_at);
-  if (!s || Date.parse(s.expires_at) < Date.now()) return null;
-  return s;
+  const [k, subject, exp, sv] = token.split("~");
+  if (k !== kind || !subject || !(Number(exp) > Date.now())) return null;
+  if (secretVersion(db, kind, subject) !== sv) return null;
+  if (db.sessions.some((x) => x.revoked_at && x.token_hash === sha256(token))) return null;
+  return { subject_id: subject };
 }
 
 function studentActive(db: Db, st: Student): boolean {

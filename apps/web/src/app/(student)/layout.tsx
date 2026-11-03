@@ -1,5 +1,5 @@
 import { getTranslations } from "next-intl/server";
-import { FolderSimple, House, Path, SignOut, UserCircle } from "@phosphor-icons/react/dist/ssr";
+import { Flask, FolderSimple, House, Path, SignOut, UserCircle } from "@phosphor-icons/react/dist/ssr";
 import { Wordmark } from "@/components/brand/Wordmark";
 import { ErrorCatalogProvider } from "@/components/code/RunParts";
 import { NavLink } from "@/components/site/NavLink";
@@ -18,6 +18,7 @@ export default async function StudentLayout({ children }: { children: React.Reac
   const links = [
     { href: "/app", label: t("home"), Icon: House, exact: true },
     { href: "/app/ruta", label: t("path"), Icon: Path },
+    { href: "/app/laboratorio", label: t("lab"), Icon: Flask },
     { href: "/app/proyectos", label: t("projects"), Icon: FolderSimple },
     { href: "/app/perfil", label: t("profile"), Icon: UserCircle },
   ];

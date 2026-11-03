@@ -20,11 +20,26 @@
     "titleAccent": "un proyecto tuyo",
     "subtitle": "Aprendemos haciendo. Cada grupo recorre el mismo camino, de la primera curiosidad a presentar algo propio.",
     "phases": {
-      "induction": { "title": "Inducción y motivación", "body": "Conocemos a mujeres que crean tecnología y descubrimos qué te gustaría construir." },
-      "training": { "title": "Capacitación técnica", "body": "Lógica en pseudocódigo y Python, con lecciones cortas y ejercicios que se revisan solos." },
-      "projects": { "title": "Creación de proyectos", "body": "Tomas una idea de tu vida diaria y la conviertes en un programa que funciona." },
-      "presentation": { "title": "Presentación comunitaria", "body": "Muestras tu proyecto a tu familia, tu escuela y tu comunidad." },
-      "evaluation": { "title": "Evaluación y retroalimentación", "body": "Revisamos juntas lo aprendido y celebramos cada avance." }
+      "induction": {
+        "title": "Inducción y motivación",
+        "body": "Conocemos a mujeres que crean tecnología y descubrimos qué te gustaría construir."
+      },
+      "training": {
+        "title": "Capacitación técnica",
+        "body": "Lógica en pseudocódigo y Python, con lecciones cortas y ejercicios que se revisan solos."
+      },
+      "projects": {
+        "title": "Creación de proyectos",
+        "body": "Tomas una idea de tu vida diaria y la conviertes en un programa que funciona."
+      },
+      "presentation": {
+        "title": "Presentación comunitaria",
+        "body": "Muestras tu proyecto a tu familia, tu escuela y tu comunidad."
+      },
+      "evaluation": {
+        "title": "Evaluación y retroalimentación",
+        "body": "Revisamos juntas lo aprendido y celebramos cada avance."
+      }
     }
   },
   "teaser": {
@@ -57,7 +72,11 @@
     "title": "Dónde ha estado",
     "titleAccent": "CODEHER",
     "body": "Empezamos en Tequixquiac y llegamos a Apaxco. Los números se actualizan solos con cada grupo nuevo.",
-    "totals": { "communities": "Comunidades", "groups": "Grupos", "students": "Estudiantes" },
+    "totals": {
+      "communities": "Comunidades",
+      "groups": "Grupos",
+      "students": "Estudiantes"
+    },
     "groups": "Grupos",
     "students": "Estudiantes",
     "since": "Desde {year}",
@@ -69,9 +88,18 @@
     "titleAccent": "detrás",
     "body": "Un equipo de mujeres en tecnología, docentes y aliadas de la comunidad.",
     "roles": {
-      "founders": { "title": "Fundadoras", "body": "Diseñan el programa, cuidan cada grupo y abren puertas en escuelas y comunidades." },
-      "educators": { "title": "Educadoras", "body": "Acompañan cada sesión, resuelven dudas y celebran los avances de su grupo." },
-      "allies": { "title": "Aliadas", "body": "Escuelas, familias y organizaciones que prestan espacios, equipo y su tiempo." }
+      "founders": {
+        "title": "Fundadoras",
+        "body": "Diseñan el programa, cuidan cada grupo y abren puertas en escuelas y comunidades."
+      },
+      "educators": {
+        "title": "Educadoras",
+        "body": "Acompañan cada sesión, resuelven dudas y celebran los avances de su grupo."
+      },
+      "allies": {
+        "title": "Aliadas",
+        "body": "Escuelas, familias y organizaciones que prestan espacios, equipo y su tiempo."
+      }
     }
   },
   "bring": {
@@ -115,5 +143,60 @@
     "start": "Empezar",
     "empty": "No hay lecciones en este lenguaje todavía.",
     "banner": "Estás probando CODEHER. Entra con tu código para guardar tus proyectos."
+  },
+  "lab": {
+    "metaTitle": "Laboratorio de código",
+    "metaDescription": "Escribe y ejecuta Python o pseudocódigo en español directamente en tu navegador, sin instalar nada.",
+    "title": "Laboratorio",
+    "titleAccent": "de código",
+    "subtitle": "Escribe lo que quieras en Python o pseudocódigo y ejecútalo aquí mismo. Tu borrador se guarda en este dispositivo.",
+    "language": "Lenguaje",
+    "examples": "Ejemplos",
+    "exampleNames": {
+      "hola": "Hola",
+      "ciclo": "Un ciclo",
+      "adivina": "Adivina el número",
+      "tabla": "Tabla de multiplicar"
+    },
+    "reset": "Empezar de nuevo",
+    "save": "Guardar como proyecto",
+    "saved": "¡Proyecto guardado!",
+    "open": "Abrir",
+    "signInToSave": "Entra con tu código para guardar tus proyectos.",
+    "saveName": "Nombre del proyecto",
+    "tips": "Consejos",
+    "tip1": "Ctrl + Enter ejecuta tu programa.",
+    "tip2": "En pseudocódigo, Paso a paso muestra cada variable mientras cambia.",
+    "tip3": "En Python, escribe en Entradas los datos que pedirá input()."
+  },
+  "faq": {
+    "title": "Preguntas",
+    "titleAccent": "frecuentes",
+    "items": [
+      {
+        "q": "¿Qué es CODEHER?",
+        "a": "CODEHER es un programa social que enseña programación a chicas y adolescentes de 12 a 18 años en comunidades semirrurales del Estado de México. Empezó en Tequixquiac y llegó a Apaxco."
+      },
+      {
+        "q": "¿Necesito saber programar o tener computadora?",
+        "a": "No. Empezamos desde cero con pseudocódigo en español y después Python. La plataforma funciona en el navegador del celular o de la computadora de la escuela."
+      },
+      {
+        "q": "¿Qué es el pseudocódigo?",
+        "a": "Es una forma de escribir programas con palabras en español, como Si, Mientras y Escribir. Sirve para aprender lógica sin pelear con el inglés ni con la sintaxis."
+      },
+      {
+        "q": "¿Cómo entran las estudiantes?",
+        "a": "Con un código y un PIN de 4 números que les entrega su educadora. No necesitan correo ni contraseña, y no tienen perfil público."
+      },
+      {
+        "q": "¿Cómo cuidan los datos de las menores?",
+        "a": "Guardamos solo el nombre o apodo y el avance. Un proyecto aparece en Logros únicamente con permiso escrito de su familia y aprobación de una fundadora."
+      },
+      {
+        "q": "¿Cómo llevo CODEHER a mi escuela o comunidad?",
+        "a": "Escríbenos desde el formulario de esta página. Armamos el grupo, damos la capacitación y acompañamos cada fase."
+      }
+    ]
   }
 }

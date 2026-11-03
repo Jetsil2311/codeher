@@ -19,7 +19,7 @@ const variants: Record<Variant, string> = {
   danger: "bg-white text-danger ring-1 ring-danger/30 hover:bg-danger/5",
   dark: "bg-white/10 text-paper ring-1 ring-white/15 hover:bg-white/16",
 };
-const sizes = { sm: "h-9 px-4 text-sm", md: "h-11 px-5 text-[0.95rem]", lg: "h-13 px-7 text-base" } as const;
+const sizes = { sm: "h-9 px-4 text-sm", md: "h-10 px-5 text-[0.95rem]", lg: "h-12 px-7 text-base" } as const;
 
 export function Button({ variant = "primary", size = "md", className, loading, children, ...rest }: ComponentProps<"button"> & { variant?: Variant; size?: keyof typeof sizes; loading?: boolean }) {
   return (

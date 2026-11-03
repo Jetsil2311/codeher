@@ -27,7 +27,7 @@ export async function LogroCard({ item, size = "md" }: { item: Card; size?: "md"
           <Icon size={26} weight="bold" aria-hidden />
         </div>
         {size === "lg" && item.preview && item.language ? (
-          <div className="absolute inset-x-5 bottom-5 top-20 overflow-hidden rounded-2xl bg-midnight/95 py-3 shadow-[0_20px_40px_-20px_rgb(26_16_54/0.9)] ring-1 ring-white/10 md:inset-x-6">
+          <div className="absolute inset-x-5 bottom-5 top-20 overflow-hidden rounded-2xl bg-midnight/95 py-3 [mask-image:linear-gradient(to_right,black_82%,transparent),linear-gradient(to_bottom,black_80%,transparent)] [mask-composite:intersect] shadow-[0_20px_40px_-20px_rgb(26_16_54/0.9)] ring-1 ring-white/10 md:inset-x-6">
             <CodeSnippet code={item.preview} language={item.language} className="text-[0.72rem] md:text-[0.78rem]" />
           </div>
         ) : null}

@@ -7,7 +7,8 @@ import { logros } from "@/server/services/public";
 
 export const dynamic = "force-dynamic";
 export async function generateMetadata(): Promise<Metadata> {
-  return { title: (await getTranslations("landing.logrosPage"))("title") };
+  const t = await getTranslations("landing.logrosPage");
+  return { title: t("title"), description: t("subtitle"), alternates: { canonical: "/logros" } };
 }
 
 const KINDS = ["project", "first_program", "first_website", "community_presentation", "milestone"] as const;
@@ -28,7 +29,7 @@ export default async function Logros({ searchParams }: { searchParams: Promise<{
     return s ? `/logros?${s}` : "/logros";
   };
   const Chip = ({ href, active, children }: { href: string; active: boolean; children: React.ReactNode }) => (
-    <Link href={href} aria-current={active ? "true" : undefined} className={cx("inline-flex h-9 items-center rounded-full px-3.5 text-sm font-semibold ring-1 transition", active ? "bg-ink text-paper ring-ink" : "bg-white text-ink-soft ring-line hover:ring-violet/50")}>
+    <Link href={href} aria-current={active ? "true" : undefined} className={cx("inline-flex h-10 shrink-0 snap-start items-center whitespace-nowrap rounded-full px-4 text-sm font-semibold ring-1 transition", active ? "bg-violet-700 text-white ring-violet-700" : "bg-paper text-ink-soft ring-ink/10 hover:ring-violet/50")}>
       {children}
     </Link>
   );
@@ -39,28 +40,28 @@ export default async function Logros({ searchParams }: { searchParams: Promise<{
       </SectionTitle>
       <p className="mt-3 max-w-[60ch] text-lg text-ink-soft">{t("subtitle")}</p>
 
-      <div role="search" aria-label={t("filters")} className="mt-8 space-y-3 rounded-[var(--radius-tile)] bg-white p-4 ring-1 ring-line md:p-5">
-        <div className="flex flex-wrap items-center gap-2">
-          <span className="w-24 text-sm font-bold">{t("year")}</span>
-          <Chip href={qs({ anio: undefined })} active={!sp.anio}>{t("all")}</Chip>
-          {years.map((y) => <Chip key={y} href={qs({ anio: String(y) })} active={sp.anio === String(y)}>{y}</Chip>)}
-        </div>
-        <div className="flex flex-wrap items-center gap-2">
-          <span className="w-24 text-sm font-bold">{t("community")}</span>
-          <Chip href={qs({ comunidad: undefined })} active={!sp.comunidad}>{t("all")}</Chip>
-          {communities.map((c) => <Chip key={c} href={qs({ comunidad: c })} active={sp.comunidad === c}>{c}</Chip>)}
-        </div>
-        <div className="flex flex-wrap items-center gap-2">
-          <span className="w-24 text-sm font-bold">{t("type")}</span>
-          <Chip href={qs({ tipo: undefined })} active={!sp.tipo}>{t("all")}</Chip>
-          {KINDS.map((k) => <Chip key={k} href={qs({ tipo: k })} active={sp.tipo === k}>{tk(k)}</Chip>)}
-        </div>
+      <div role="search" aria-label={t("filters")} className="mt-8 grid gap-4 rounded-[1.5rem] bg-white p-4 ring-1 ring-ink/[0.06] md:grid-cols-3 md:p-5">
+        {[
+          { label: t("year"), key: "anio", all: !sp.anio, opts: years.map((y) => ({ v: String(y), l: String(y) })) },
+          { label: t("community"), key: "comunidad", all: !sp.comunidad, opts: communities.map((c) => ({ v: c, l: c })) },
+          { label: t("type"), key: "tipo", all: !sp.tipo, opts: KINDS.map((k) => ({ v: k, l: tk(k) })) },
+        ].map((f) => (
+          <div key={f.key} className="min-w-0">
+            <p className="mb-2 text-xs font-bold uppercase tracking-wide text-ink-muted">{f.label}</p>
+            <div className="-mx-1 flex snap-x gap-2 overflow-x-auto px-1 pb-1 [scrollbar-width:none]">
+              <Chip href={qs({ [f.key]: undefined })} active={f.all}>{t("all")}</Chip>
+              {f.opts.map((o) => (
+                <Chip key={o.v} href={qs({ [f.key]: o.v })} active={(sp as Record<string, string | undefined>)[f.key] === o.v}>{o.l}</Chip>
+              ))}
+            </div>
+          </div>
+        ))}
       </div>
-      <p className="mt-4 text-sm font-semibold text-ink-muted" aria-live="polite">{t("results", { n: items.length })}</p>
+      {items.length > 0 ? <p className="mt-4 text-sm font-semibold text-ink-muted" aria-live="polite">{t("results", { n: items.length })}</p> : null}
 
       {items.length === 0 ? (
-        <div className="mt-8 text-center">
-          <p className="text-ink-muted">{t("empty")}</p>
+        <div className="mt-10 rounded-[1.5rem] border border-dashed border-violet/35 bg-white/60 px-6 py-12 text-center" aria-live="polite">
+          <p className="text-lg font-semibold text-ink">{t("empty")}</p>
           <Link href="/logros" className="mt-3 inline-block font-semibold text-violet-700 underline">{t("clear")}</Link>
         </div>
       ) : (

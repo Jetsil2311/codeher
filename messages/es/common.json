@@ -9,10 +9,12 @@
     "probar": "Probar",
     "logros": "Logros",
     "how": "Cómo funciona",
-    "bring": "Llévalo a tu comunidad",
+    "bring": "Colabora",
     "entrar": "Entrar",
     "menu": "Abrir menú",
-    "close": "Cerrar menú"
+    "close": "Cerrar menú",
+    "lab": "Laboratorio",
+    "primaryCta": "Entrar"
   },
   "footer": {
     "tagline": "Programación para chicas y adolescentes del Estado de México. Aprende, crea y presenta tus proyectos en tu comunidad.",

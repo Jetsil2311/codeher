@@ -6,7 +6,12 @@ import { hashSecret } from "../crypto";
 import type { Db, ErrorTranslation, Exercise, Lesson } from "./types";
 
 const iso = () => new Date().toISOString();
-const id = () => crypto.randomUUID();
+// Deterministic ids: every server instance (Vercel can run several) builds the same seed,
+// so ids in cookies and URLs resolve everywhere.
+function det(key: string): string {
+  const h = createHash("sha256").update(`codeher:${key}`).digest("hex");
+  return `${h.slice(0, 8)}-${h.slice(8, 12)}-4${h.slice(13, 16)}-a${h.slice(17, 20)}-${h.slice(20, 32)}`;
+}
 
 /** Local demo accounts (DATA_MODE=local only). Shown on the sign-in pages in local mode. */
 export const DEMO = {
@@ -53,19 +58,19 @@ const PY_ERRORS: Array<Omit<ErrorTranslation, "id" | "enabled">> = [
 
 export function buildSeed(): Db {
   const t = iso();
-  const founderId = id();
-  const educatorId = id();
+  const founderId = det("profile:founder");
+  const educatorId = det("profile:educator");
   const db: Db = {
     version: 1,
     seq: 0,
     profiles: [
-      { id: founderId, display_name: DEMO.founder.name, email: DEMO.founder.email, role: "founder", active: true, password_hash: hashSecret(DEMO.founder.password), created_at: t },
-      { id: educatorId, display_name: DEMO.educator.name, email: DEMO.educator.email, role: "educator", active: true, password_hash: hashSecret(DEMO.educator.password), created_at: t },
+      { id: founderId, display_name: DEMO.founder.name, email: DEMO.founder.email, role: "founder", active: true, password_hash: hashSecret(DEMO.founder.password, det("salt:founder").slice(0, 32)), created_at: t },
+      { id: educatorId, display_name: DEMO.educator.name, email: DEMO.educator.email, role: "educator", active: true, password_hash: hashSecret(DEMO.educator.password, det("salt:educator").slice(0, 32)), created_at: t },
     ],
     invites: [{ email: "jjclaudegpt@gmail.com", role: "founder", invited_by: null, created_at: t, accepted_at: null }],
     communities: [
-      { id: id(), slug: "tequixquiac", name: "Tequixquiac", state: "Estado de México", since_year: null, position: 1, active: true },
-      { id: id(), slug: "apaxco", name: "Apaxco", state: "Estado de México", since_year: null, position: 2, active: true },
+      { id: det("community:tequixquiac"), slug: "tequixquiac", name: "Tequixquiac", state: "Estado de México", since_year: null, position: 1, active: true },
+      { id: det("community:apaxco"), slug: "apaxco", name: "Apaxco", state: "Estado de México", since_year: null, position: 2, active: true },
     ],
     settings: {
       session_hours: 12,
@@ -97,7 +102,7 @@ export function buildSeed(): Db {
     projects: [],
     project_versions: [],
     accomplishments: [],
-    error_translations: PY_ERRORS.map((e) => ({ ...e, id: id(), enabled: true })),
+    error_translations: PY_ERRORS.map((e, i) => ({ ...e, id: det(`error:${i}`), enabled: true })),
     api_keys: [],
     access_log: [],
     content_audit_log: [],
@@ -105,8 +110,8 @@ export function buildSeed(): Db {
 
   const moduleByCourse = new Map<string, string>();
   for (const c of COURSES) {
-    const cid = id();
-    const mid = id();
+    const cid = det(`course:${c.slug}`);
+    const mid = det(`module:${c.slug}:${c.module.slug}`);
     db.courses.push({ id: cid, slug: c.slug, title: c.title, description: c.description, status: "published", position: c.position, created_by: founderId });
     db.modules.push({ id: mid, course_id: cid, slug: c.module.slug, title: c.module.title, position: 1, status: "published" });
     moduleByCourse.set(c.slug, mid);
@@ -114,7 +119,7 @@ export function buildSeed(): Db {
 
   const lessonIds = new Map<string, string>();
   for (const l of LESSONS) {
-    const lid = id();
+    const lid = det(`lesson:${l.slug}`);
     lessonIds.set(l.slug, lid);
     const lesson: Lesson = {
       id: lid,
@@ -136,10 +141,10 @@ export function buildSeed(): Db {
     };
     db.lessons.push(lesson);
     l.exercises.forEach((e, i) => {
-      const tests = (e.tests ?? []).map((tt) => ({ id: id(), kind: tt.kind, description: tt.description, spec: tt.spec as Record<string, unknown>, hidden: !!tt.hidden }));
+      const tests = (e.tests ?? []).map((tt, ti) => ({ id: det(`test:${l.slug}:${e.slug}:${ti}`), kind: tt.kind, description: tt.description, spec: tt.spec as Record<string, unknown>, hidden: !!tt.hidden }));
       const solution = e.solution ?? "";
       db.exercises.push({
-        id: id(),
+        id: det(`exercise:${l.slug}:${e.slug}`),
         lesson_id: lid,
         slug: e.slug,
         position: i + 1,
@@ -164,12 +169,12 @@ export function buildSeed(): Db {
         },
       });
     });
-    if (l.deck) db.decks.push({ id: id(), lesson_id: lid, title: l.title, slides: l.deck, status: "published", version: 1 });
+    if (l.deck) db.decks.push({ id: det(`deck:${l.slug}`), lesson_id: lid, title: l.title, slides: l.deck, status: "published", version: 1 });
   }
   for (const l of LESSONS) if (l.pair) db.lessons.find((x) => x.slug === l.slug)!.pair_lesson_id = lessonIds.get(l.pair) ?? null;
 
   // Demo group for local testing: 2611 (November 2026), Tequixquiac, both courses assigned.
-  const gid = id();
+  const gid = det("group:demo");
   const community = db.communities[0];
   db.groups.push({ id: gid, year: DEMO.group.year, month: DEMO.group.month, letter: null, community_id: community.id, label: "Grupo demo", status: "active", ends_on: null, next_number: DEMO.students.length + 1, created_by: educatorId, created_at: t, closed_at: null });
   db.educator_groups.push({ educator_id: educatorId, group_id: gid, assigned_at: t });
@@ -177,15 +182,15 @@ export function buildSeed(): Db {
   DEMO.students.forEach((s, i) => {
     const n = i + 1;
     db.students.push({
-      id: id(), group_id: gid, number: n, code: `2611${String(n).padStart(2, "0")}`, nickname: s.nickname, avatar: ["orbita", "cometa", "chispa"][i] ?? "orbita",
-      status: "active", pin_hash: hashSecret(s.pin), failed_attempts: 0, locked_until: null, hard_locked: false,
+      id: det(`student:${n}`), group_id: gid, number: n, code: `2611${String(n).padStart(2, "0")}`, nickname: s.nickname, avatar: ["orbita", "cometa", "chispa"][i] ?? "orbita",
+      status: "active", pin_hash: hashSecret(s.pin, det(`salt:student:${n}`).slice(0, 32)), failed_attempts: 0, locked_until: null, hard_locked: false,
       guardian_consent: false, consent_reference: null, consent_recorded_at: null, last_active_at: null, created_at: t,
     });
   });
 
   for (const s of SAMPLE_LOGROS) {
     db.accomplishments.push({
-      id: id(), student_id: null, project_id: null, kind: s.kind, title: s.title, blurb: s.blurb, tags: s.tags, language: s.language, code: s.code,
+      id: det(`logro:${s.title}`), student_id: null, project_id: null, kind: s.kind, title: s.title, blurb: s.blurb, tags: s.tags, language: s.language, code: s.code,
       display_name: "Ejemplo", community_id: db.communities.find((c) => c.slug === s.community)?.id ?? null, year: 2026,
       status: "published", featured: s.featured, is_sample: true, nominated_by_student: false, nominated_by: null,
       nominated_at: t, reviewed_at: t, published_at: t,

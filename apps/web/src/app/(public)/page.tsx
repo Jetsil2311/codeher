@@ -7,6 +7,8 @@ import { LogroCard } from "@/components/site/LogroCard";
 import { Reveal } from "@/components/site/Reveal";
 import { ButtonLink, CodeGlyphs, SectionTitle } from "@/components/ui";
 import { landing } from "@/server/services/public";
+import { SITE_URL } from "@/lib/site";
+import { CaretDown } from "@phosphor-icons/react/dist/ssr";
 
 export const dynamic = "force-dynamic";
 
@@ -21,6 +23,25 @@ FinProceso`;
 export default async function Landing() {
   const t = await getTranslations("landing");
   const data = landing();
+  const faq = t.raw("faq.items") as { q: string; a: string }[];
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "EducationalOrganization",
+        "@id": `${SITE_URL}/#org`,
+        name: "CODEHER",
+        url: SITE_URL,
+        logo: `${SITE_URL}/icon.svg`,
+        description: t("why.p2"),
+        areaServed: data.communities.map((c) => ({ "@type": "Place", name: `${c.name}, ${c.state}` })),
+        knowsLanguage: "es-MX",
+        email: data.contact_email,
+      },
+      { "@type": "WebSite", "@id": `${SITE_URL}/#web`, url: SITE_URL, name: "CODEHER", inLanguage: "es-MX", publisher: { "@id": `${SITE_URL}/#org` } },
+      { "@type": "FAQPage", mainEntity: faq.map((f) => ({ "@type": "Question", name: f.q, acceptedAnswer: { "@type": "Answer", text: f.a } })) },
+    ],
+  };
   const phases = [
     { key: "induction", Icon: Sparkle },
     { key: "training", Icon: Code },
@@ -72,12 +93,12 @@ export default async function Landing() {
                 <span className="text-[#b8acd6]">salida ›</span> Yo puedo crear tecnología
               </div>
             </div>
-            <div className="absolute -left-4 top-1/3 rotate-[-6deg] rounded-2xl bg-white px-4 py-3 shadow-[var(--shadow-lift)] motion-safe:animate-float md:-left-10" style={{ ["--r" as string]: "-6deg" }}>
+            <div className="absolute -left-4 top-1/3 hidden rotate-[-6deg] rounded-2xl bg-white sm:block px-4 py-3 shadow-[var(--shadow-lift)] motion-safe:animate-float md:-left-10" style={{ ["--r" as string]: "-6deg" }}>
               <p className="flex items-center gap-2 text-sm font-bold text-sun-700">
                 <Star size={18} weight="fill" className="text-[#e0b800]" /> +20 XP
               </p>
             </div>
-            <div className="absolute -right-2 bottom-8 rotate-[5deg] rounded-2xl bg-ink px-4 py-3 text-paper shadow-[var(--shadow-lift)] motion-safe:animate-float md:-right-8" style={{ ["--r" as string]: "5deg", animationDelay: "1.4s" }}>
+            <div className="absolute -right-2 bottom-8 hidden rotate-[5deg] rounded-2xl bg-ink sm:block px-4 py-3 text-paper shadow-[var(--shadow-lift)] motion-safe:animate-float md:-right-8" style={{ ["--r" as string]: "5deg", animationDelay: "1.4s" }}>
               <p className="font-accent text-lg italic text-pink">{t("hero.badge")}</p>
             </div>
           </div>
@@ -113,7 +134,7 @@ export default async function Landing() {
             <p className="mt-3 max-w-[60ch] text-lg text-ink-soft">{t("how.subtitle")}</p>
           </Reveal>
           <ol className="relative mt-14 grid gap-6 lg:grid-cols-5 lg:gap-4">
-            <span className="absolute left-7 top-2 hidden h-[calc(100%-1rem)] w-0.5 bg-grad lg:hidden" aria-hidden />
+            <span className="absolute left-7 top-2 h-[calc(100%-1rem)] w-0.5 bg-grad lg:hidden" aria-hidden />
             <span className="absolute left-0 right-0 top-7 hidden h-0.5 bg-grad lg:block" aria-hidden />
             {phases.map(({ key, Icon }, i) => (
               <li key={key} className="relative">
@@ -265,6 +286,32 @@ export default async function Landing() {
               })}
         </div>
       </section>
+
+      {/* ---------- FAQ ---------- */}
+      <section aria-labelledby="faq-t" className="mx-auto max-w-4xl px-4 pb-20 md:px-6 md:pb-28">
+        <Reveal>
+          <SectionTitle accent={t("faq.titleAccent")}>
+            <span id="faq-t">{t("faq.title")}</span>
+          </SectionTitle>
+        </Reveal>
+        <div className="mt-8 space-y-3">
+          {faq.map((f, i) => (
+            <details key={i} className="group tile overflow-hidden" open={i === 0}>
+              <summary className="flex cursor-pointer list-none items-center justify-between gap-4 px-5 py-4 text-lg font-bold text-ink md:px-6 [&::-webkit-details-marker]:hidden">
+                {f.q}
+                <CaretDown size={20} weight="bold" className="shrink-0 text-violet-700 transition group-open:rotate-180" aria-hidden />
+              </summary>
+              <p className="px-5 pb-5 text-ink-soft md:px-6">{f.a}</p>
+            </details>
+          ))}
+        </div>
+      </section>
+
+      <script
+        type="application/ld+json"
+        // eslint-disable-next-line react/no-danger
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd).replace(/</g, "\\u003c") }}
+      />
 
       {/* ---------- Bring CODEHER to your community ---------- */}
       <section id="lleva-codeher" aria-labelledby="lleva-t" className="relative scroll-mt-20 overflow-hidden bg-grad py-20 md:py-28">

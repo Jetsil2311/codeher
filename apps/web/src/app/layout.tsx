@@ -3,6 +3,7 @@ import { Fraunces, JetBrains_Mono, Montserrat } from "next/font/google";
 import { NextIntlClientProvider } from "next-intl";
 import { getTranslations } from "next-intl/server";
 import "./globals.css";
+import { SITE_URL } from "@/lib/site";
 
 // Self-hosted at build time by next/font, subset to Latin (accents, ñ, ¿ and ¡ included).
 const montserrat = Montserrat({ subsets: ["latin"], weight: ["400", "500", "600", "700", "800"], variable: "--font-montserrat", display: "swap" });
@@ -12,14 +13,19 @@ const fraunces = Fraunces({ subsets: ["latin"], weight: ["600"], style: ["italic
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations("common.meta");
   return {
+    metadataBase: new URL(SITE_URL),
     title: { default: t("title"), template: `%s · CODEHER` },
     description: t("description"),
     applicationName: "CODEHER",
-    openGraph: { title: t("title"), description: t("description"), locale: "es_MX", type: "website" },
+    keywords: ["programación para niñas", "aprender a programar en español", "pseudocódigo", "Python para principiantes", "mujeres en STEM", "Estado de México", "Tequixquiac", "Apaxco"],
+    alternates: { canonical: "/" },
+    openGraph: { title: t("title"), description: t("description"), locale: "es_MX", type: "website", siteName: "CODEHER" },
+    twitter: { card: "summary_large_image", title: t("title"), description: t("description") },
+    formatDetection: { telephone: false },
   };
 }
 
-export const viewport: Viewport = { width: "device-width", initialScale: 1, themeColor: "#9b5de5" };
+export const viewport: Viewport = { width: "device-width", initialScale: 1, themeColor: "#ffffff", viewportFit: "cover" };
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
   const t = await getTranslations("common");

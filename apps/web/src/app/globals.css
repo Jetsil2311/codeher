@@ -159,6 +159,12 @@ body {
 .prose-codeher table { width: 100%; border-collapse: collapse; font-size: 0.95rem; }
 .prose-codeher th, .prose-codeher td { border-bottom: 1px solid var(--color-line); padding: 0.45rem 0.6rem; text-align: left; }
 
+/* Grid and flex children never grow past their track (prevents mobile overflow from code). */
+.grid > * { min-width: 0; }
+
+/* Code never uses ligatures: students must see exactly what they type (<- not ←). */
+.font-mono, code, pre, kbd, .cm-editor, .cm-content { font-variant-ligatures: none; font-feature-settings: "liga" 0, "calt" 0; }
+
 /* CodeMirror base */
 .cm-editor { height: 100%; font-size: 15px; }
 .cm-editor.cm-focused { outline: none; }

@@ -6,8 +6,12 @@ import { buildSeed } from "./seed";
 
 // Local data adapter (DATA_MODE=local): one JSON file, read once, written atomically.
 // Same shapes as the Postgres tables, so the Supabase adapter is a drop-in later.
-const FILE = process.env.CODEHER_DATA_FILE ?? join(process.cwd(), ".data", "codeher.json");
-const DB_VERSION = 1;
+// On Vercel the project folder is read-only, so local mode keeps its file in /tmp.
+// That copy is per server instance and resets on redeploys: fine for a UI preview only.
+const FILE =
+  process.env.CODEHER_DATA_FILE ??
+  (process.env.VERCEL ? join("/tmp", "codeher", "codeher.json") : join(process.cwd(), ".data", "codeher.json"));
+const DB_VERSION = 2;
 
 type Holder = { db: Db | null };
 const g = globalThis as unknown as { __codeherDb?: Holder };

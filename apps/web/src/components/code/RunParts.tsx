@@ -97,6 +97,9 @@ export function OutputConsole({ output, waitingFor, onInput, empty, running, cla
               placeholder={t("inputPlaceholder", { name: waitingFor })}
               className="h-10 min-w-0 flex-1 rounded-lg bg-white/8 px-3 text-paper placeholder:text-[#8f84b0] focus:outline-none focus:ring-2 focus:ring-pink"
               autoComplete="off"
+              data-1p-ignore
+              data-lpignore="true"
+              enterKeyHint="send"
             />
             <button type="submit" className="inline-flex h-10 items-center gap-1 rounded-lg bg-pink px-3 text-sm font-bold text-ink active:scale-95">
               <ArrowBendDownLeft size={16} weight="bold" aria-hidden /> {t("send")}

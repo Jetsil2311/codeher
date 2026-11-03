@@ -3,31 +3,33 @@ import { getTranslations } from "next-intl/server";
 import { Wordmark } from "@/components/brand/Wordmark";
 import { ButtonLink } from "@/components/ui";
 import { MobileMenu } from "./MobileMenu";
+import { NavLink } from "./NavLink";
 
 export async function PublicHeader() {
   const t = await getTranslations("common.nav");
   const links = [
     { href: "/probar", label: t("probar") },
+    { href: "/laboratorio", label: t("lab") },
     { href: "/logros", label: t("logros") },
     { href: "/#como-funciona", label: t("how") },
     { href: "/#lleva-codeher", label: t("bring") },
   ];
   return (
-    <header className="sticky top-0 z-40 border-b border-ink/5 bg-paper/85 backdrop-blur-md supports-[backdrop-filter]:bg-paper/70">
-      <div className="mx-auto flex h-16 max-w-7xl items-center justify-between gap-4 px-4 md:px-6">
-        <Wordmark size={24} />
-        <nav aria-label={t("main")} className="hidden items-center gap-1 lg:flex">
+    <header className="sticky top-0 z-40 border-b border-ink/[0.06] bg-white/[0.92] backdrop-blur-xl">
+      <div className="mx-auto flex h-16 max-w-7xl items-center justify-between gap-3 px-4 md:px-6">
+        <Wordmark size={23} />
+        <nav aria-label={t("main")} className="hidden items-center gap-0.5 lg:flex">
           {links.map((l) => (
-            <Link key={l.href} href={l.href} className="rounded-full px-3.5 py-2 text-[0.95rem] font-semibold text-ink-soft transition hover:bg-violet-100 hover:text-ink">
+            <NavLink key={l.href} href={l.href} variant="top">
               {l.label}
-            </Link>
+            </NavLink>
           ))}
         </nav>
         <div className="flex items-center gap-2">
-          <ButtonLink href="/entrar" size="sm" className="hidden sm:inline-flex">
+          <ButtonLink href="/entrar" size="md">
             {t("entrar")}
           </ButtonLink>
-          <MobileMenu links={[...links, { href: "/entrar", label: t("entrar") }]} label={t("menu")} closeLabel={t("close")} />
+          <MobileMenu links={links} label={t("menu")} closeLabel={t("close")} cta={{ href: "/entrar", label: t("entrar") }} secondary={{ href: "/probar", label: t("probar") }} />
         </div>
       </div>
     </header>

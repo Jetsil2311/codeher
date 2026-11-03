@@ -100,9 +100,11 @@ export interface CodeEditorProps {
   label: string;
   onRun?: () => void;
   className?: string;
+  /** Grow to the parent's height (fullscreen workspace). */
+  fill?: boolean;
 }
 
-export function CodeEditor({ value, onChange, language, readOnly, stepLine = null, errorLine = null, minHeight = 220, label, onRun, className }: CodeEditorProps) {
+export function CodeEditor({ value, onChange, language, readOnly, stepLine = null, errorLine = null, minHeight = 220, label, onRun, className, fill }: CodeEditorProps) {
   const t = useTranslations("learn.editor");
   const host = useRef<HTMLDivElement>(null);
   const view = useRef<EditorView | null>(null);
@@ -193,17 +195,17 @@ export function CodeEditor({ value, onChange, language, readOnly, stepLine = nul
   const HELPER = ["<-", "<>", "<=", ">=", ";", '""', "Si", "Para", "Mientras", "Segun"];
 
   return (
-    <div className={`overflow-hidden rounded-[1.25rem] bg-midnight ring-1 ring-white/5 ${className ?? ""}`}>
-      <div ref={host} style={{ minHeight }} className="[&_.cm-editor]:min-h-[inherit]" />
+    <div className={`flex min-w-0 flex-col overflow-hidden bg-midnight ${fill ? "h-full" : ""} ${className ?? "rounded-[1.25rem] ring-1 ring-white/5"}`}>
+      <div ref={host} style={fill ? undefined : { minHeight }} className={fill ? "min-h-0 flex-1 overflow-hidden [&_.cm-editor]:h-full" : "[&_.cm-editor]:min-h-[inherit]"} />
       {language === "pseudocode_es" && !readOnly && (
-        <div role="toolbar" aria-label={t("helper")} className="flex gap-1.5 overflow-x-auto border-t border-white/10 bg-midnight-2 px-2 py-2 md:hidden">
+        <div role="toolbar" aria-label={t("helper")} className="flex shrink-0 gap-1.5 overflow-x-auto border-t border-white/10 bg-midnight-2 px-2 py-2 md:hidden">
           {HELPER.map((h) => (
             <button
               key={h}
               type="button"
               onMouseDown={(e) => e.preventDefault()}
               onClick={() => insert(/^[A-Z]/.test(h) ? `${h} ` : h)}
-              className="min-h-10 min-w-11 shrink-0 rounded-xl bg-white/8 px-3 font-mono text-sm text-paper active:scale-95"
+              className="min-h-10 min-w-11 shrink-0 rounded-xl bg-white/8 px-3 font-mono text-sm text-paper [font-variant-ligatures:none] active:scale-95"
             >
               {h === '""' ? "“ ”" : h}
             </button>

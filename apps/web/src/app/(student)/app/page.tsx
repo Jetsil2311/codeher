@@ -49,22 +49,22 @@ export default async function Inicio() {
           )}
         </Tile>
 
-        <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-1">
-          <Tile className="p-6">
+        <div className="grid grid-cols-2 gap-4 lg:grid-cols-1 lg:gap-5">
+          <Tile className="p-4 sm:p-6">
             <div className="flex items-center justify-between">
               <h2 className="text-sm font-bold text-ink-muted">{t("level")}</h2>
               <Star size={22} weight="fill" className="text-[#e0b800]" aria-hidden />
             </div>
-            <p className="mt-1 text-4xl font-extrabold tabular-nums">{h.level}</p>
+            <p className="mt-1 text-3xl font-extrabold tabular-nums sm:text-4xl">{h.level}</p>
             <Progress value={levelProgress(h.xp)} label={t("levelProgress")} className="mt-3" />
             <p className="mt-2 text-sm text-ink-muted">{t("xpLine", { xp: h.xp, next: xpToNextLevel(h.xp) })}</p>
           </Tile>
-          <Tile className="p-6">
+          <Tile className="p-4 sm:p-6">
             <div className="flex items-center justify-between">
               <h2 className="text-sm font-bold text-ink-muted">{t("streak")}</h2>
               <Fire size={24} weight="fill" className="text-pink" aria-hidden />
             </div>
-            <p className="mt-1 text-4xl font-extrabold tabular-nums">{t("days", { n: h.streak })}</p>
+            <p className="mt-1 text-3xl font-extrabold tabular-nums sm:text-4xl">{t("days", { n: h.streak })}</p>
             <p className="mt-2 text-sm text-ink-muted">{t("longest", { n: h.longest_streak })}</p>
             <p className="mt-3 text-sm text-ink-muted">{t("lessons", { done: h.lessons_completed, total: h.lessons_total })}</p>
           </Tile>

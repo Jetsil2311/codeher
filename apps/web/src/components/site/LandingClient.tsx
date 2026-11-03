@@ -35,9 +35,7 @@ export function TeaserEditor() {
           </button>
         ))}
       </div>
-      <div className="rounded-[1.5rem] bg-paper p-3 md:p-4">
-        <Playground key={lang} language={lang} code={TEASER[lang]} minHeight={190} compact />
-      </div>
+      <Playground key={lang} language={lang} code={TEASER[lang]} minHeight={190} compact className="[&>div:first-child]:shadow-[0_30px_60px_-30px_rgb(0_0_0/0.7)] [&>div:first-child]:ring-white/10" />
     </div>
   );
 }

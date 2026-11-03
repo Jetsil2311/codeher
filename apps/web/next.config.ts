@@ -13,7 +13,7 @@ const csp = [
   "img-src 'self' data: blob:",
   "font-src 'self' data:",
   "connect-src 'self' https://cdn.jsdelivr.net https://*.supabase.co wss://*.supabase.co" + (process.env.NODE_ENV === "development" ? " ws:" : ""),
-  "frame-ancestors 'none'",
+  process.env.NODE_ENV === "development" ? "frame-ancestors 'self'" : "frame-ancestors 'none'",
   "base-uri 'self'",
   "form-action 'self'",
 ].join("; ");

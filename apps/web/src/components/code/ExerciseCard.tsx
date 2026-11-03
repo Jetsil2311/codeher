@@ -1,16 +1,12 @@
 "use client";
 import { useState, useTransition } from "react";
 import { useTranslations } from "next-intl";
-import { motion, AnimatePresence, useReducedMotion } from "motion/react";
-import { Bug, CheckCircle, CircleDashed, Lightbulb, MagicWand, Play, Sparkle, Star, Stop, Target } from "@phosphor-icons/react/dist/ssr";
-import type { CodeLanguage, RawError, RunReport, Test } from "@codeher/core";
-import { format as formatPseudo } from "@codeher/grader/pseudo";
+import { CheckCircle, CircleDashed, FloppyDisk, Lightbulb, Sparkle, Star, Target } from "@phosphor-icons/react/dist/ssr";
+import type { CodeLanguage, RunReport, Test } from "@codeher/core";
 import { cx, Tag } from "@/components/ui";
-import { CodeEditor } from "./CodeEditor";
+import { CodeWorkspace } from "./CodeWorkspace";
 import { gradeWith } from "./engines";
 import { Markdown } from "./Markdown";
-import { ErrorCard, OutputConsole, PythonLoading, StepControls, VariableWatch } from "./RunParts";
-import { useCodeRun } from "./useCodeRun";
 import { celebrate } from "./celebrate";
 
 export interface ExercisePayload {
@@ -62,10 +58,7 @@ export function ExerciseCard({ exercise, language, locked, onSubmitCode, onSubmi
   const [answerState, setAnswerState] = useState<"idle" | "right" | "notyet">(exercise.progress?.passed ? "right" : "idle");
   const [explanation, setExplanation] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
-  const r = useCodeRun(language);
-  const reduce = useReducedMotion();
-  const isPseudo = language === "pseudocode_es";
-  const debugging = r.mode === "debug" && (r.snap.state === "stepping" || r.snap.state === "waiting");
+  const [resultsKey, setResultsKey] = useState(0);
   const firstStdin = (exercise.tests.find((x) => (x.spec as { stdin?: string[] }).stdin)?.spec as { stdin?: string[] } | undefined)?.stdin ?? [];
 
   const after = (res: SubmitResult) => {
@@ -85,9 +78,9 @@ export function ExerciseCard({ exercise, language, locked, onSubmitCode, onSubmi
   const check = async () => {
     setChecking(true);
     setServerError(null);
-    r.reset();
     const rep = await gradeWith(language, { id: `${exercise.id}-${Date.now()}`, code, tests: exercise.tests, timeoutMs: exercise.timeout_ms });
     setReport(rep);
+    setResultsKey((k) => k + 1);
     setChecking(false);
     if (rep.ok) setPassed(true);
     if (onSubmitCode) {
@@ -123,11 +116,10 @@ export function ExerciseCard({ exercise, language, locked, onSubmitCode, onSubmi
     });
   };
 
-  const err: RawError | null = report?.error ?? (r.snap.state === "error" ? r.snap.error : null);
 
   return (
     <article id={`ejercicio-${exercise.slug}`} className="tile scroll-mt-24 overflow-hidden">
-      <header className="flex flex-wrap items-start justify-between gap-3 border-b border-line px-5 pt-5 pb-4 md:px-6">
+      <header className="flex flex-wrap items-start justify-between gap-3 border-b border-line px-4 pt-5 pb-4 md:px-6">
         <div className="min-w-0">
           <p className="font-mono text-xs font-medium text-violet-700">{t("exercise.number", { n: exercise.position })}</p>
           <h3 className="mt-0.5 text-lg font-bold text-ink md:text-xl">{exercise.title}</h3>
@@ -144,58 +136,47 @@ export function ExerciseCard({ exercise, language, locked, onSubmitCode, onSubmi
           )}
         </div>
       </header>
-      <div className="space-y-4 px-5 py-5 md:px-6">
-        <Markdown source={exercise.instructions_md} language={language} />
+      <div className="space-y-4 px-3 py-4 sm:px-5 sm:py-5 md:px-6">
+        <Markdown source={exercise.instructions_md} language={language} className="px-1" />
 
         {exercise.type === "code" ? (
-          <>
-            <CodeEditor value={code} onChange={setCode} language={language} stepLine={debugging ? r.snap.line : null} errorLine={err?.line ?? null} minHeight={180} label={t("editor.labelFor", { title: exercise.title })} onRun={() => r.run(code, firstStdin)} />
-            <div className="flex flex-wrap items-center gap-2">
-              <button type="button" disabled={locked || checking || pending} onClick={check} className="grad-edge inline-flex h-11 items-center gap-2 rounded-full bg-pink px-5 font-semibold text-ink shadow-[var(--shadow-pop)] transition active:scale-95 disabled:opacity-50">
-                <Target size={18} weight="bold" aria-hidden /> {checking || pending ? t("actions.checking") : t("actions.check")}
-              </button>
-              {r.mode === "run" && (r.snap.state === "running" || r.snap.state === "waiting") ? (
-                <button type="button" onClick={r.stop} className="inline-flex h-11 items-center gap-2 rounded-full bg-ink px-4 font-semibold text-paper active:scale-95">
-                  <Stop size={18} weight="fill" aria-hidden /> {t("actions.stop")}
+          <CodeWorkspace
+            language={language}
+            code={code}
+            onCodeChange={setCode}
+            title={exercise.title}
+            showTitle={false}
+            minHeight={180}
+            stdin={firstStdin}
+            onRunStart={() => setReport(null)}
+            externalError={report?.error ?? null}
+            resultsKey={resultsKey}
+            primary={{ label: t("actions.check"), icon: <Target size={18} weight="bold" aria-hidden />, onClick: check, loading: checking || pending, disabled: locked }}
+            headerExtra={
+              onSaveProject ? (
+                <button type="button" disabled={saving} title={saveLabel} aria-label={saveLabel} onClick={async () => { setSaving(true); await onSaveProject(code); setSaving(false); }} className="grid size-10 place-items-center rounded-xl text-[#d6cdea] transition hover:bg-white/10 hover:text-paper disabled:opacity-40">
+                  <FloppyDisk size={19} weight="bold" aria-hidden />
                 </button>
-              ) : (
-                <button type="button" onClick={() => { setReport(null); r.run(code, []); }} className="inline-flex h-11 items-center gap-2 rounded-full bg-white px-4 font-semibold text-ink ring-1 ring-ink/12 transition hover:bg-violet-50 active:scale-95">
-                  <Play size={18} weight="fill" aria-hidden /> {t("actions.run")}
-                </button>
-              )}
-              {isPseudo && (
-                <>
-                  <button type="button" onClick={() => { setReport(null); r.debug(code, firstStdin); }} className="inline-flex h-11 items-center gap-2 rounded-full px-3 font-semibold text-violet-700 transition hover:bg-violet-100 active:scale-95">
-                    <Bug size={18} weight="bold" aria-hidden /> {t("actions.step")}
-                  </button>
-                  <button type="button" onClick={() => setCode(formatPseudo(code))} className="inline-flex h-11 items-center gap-2 rounded-full px-3 font-semibold text-violet-700 transition hover:bg-violet-100 active:scale-95">
-                    <MagicWand size={18} weight="bold" aria-hidden /> {t("actions.format")}
-                  </button>
-                </>
-              )}
-              <span className="ml-auto">
-                {onSaveProject ? (
-                  <button type="button" disabled={saving} onClick={async () => { setSaving(true); await onSaveProject(code); setSaving(false); }} className="inline-flex h-11 items-center rounded-full px-3 text-sm font-semibold text-violet-700 hover:bg-violet-100 disabled:opacity-50">
-                    {saveLabel}
-                  </button>
-                ) : noSaveLabel ? (
-                  <span className="text-xs text-ink-muted">{noSaveLabel}</span>
-                ) : null}
-              </span>
-            </div>
-            {!isPseudo && <PythonLoading status={r.pyStatus} />}
-            {debugging && (
-              <div className="space-y-3 rounded-[1.25rem] bg-midnight p-3">
-                <StepControls playing={r.playing} onPlay={r.play} onPause={r.pause} onStep={r.step} onRestart={() => r.debug(code, firstStdin)} speed={r.speed} onSpeed={r.setSpeed} disabled={r.snap.state === "waiting"} />
-                <VariableWatch variables={r.snap.variables} line={r.snap.line} />
-              </div>
-            )}
-            {(r.snap.state !== "idle" || report) && (
-              <OutputConsole output={report ? report.stdout : r.snap.output} waitingFor={report ? null : r.snap.inputPrompt} onInput={r.provideInput} running={r.snap.state === "running"} />
-            )}
-            {err ? <ErrorCard error={err} language={language} /> : null}
-            {report && report.tests.length > 0 && <TestResults report={report} tests={exercise.tests} />}
-          </>
+              ) : null
+            }
+            results={
+              report || reward || serverError ? (
+                <div className="space-y-3">
+                  {report && report.tests.length > 0 && <TestResults report={report} tests={exercise.tests} />}
+                  {serverError ? <p role="alert" className="rounded-xl bg-pink-100 px-4 py-2 text-sm font-medium text-ink">{t(`serverErrors.${serverError in SERVER_ERRORS ? serverError : "unexpected"}` as "serverErrors.unexpected")}</p> : null}
+                  {reward && (
+                    <div className="flex items-center gap-3 rounded-2xl bg-ink p-4 text-paper" role="status">
+                      <Sparkle size={26} weight="fill" className="text-sun" aria-hidden />
+                      <div>
+                        <p className="font-bold">{reward.lesson ? t("feedback.lessonDone") : t("feedback.passed")}</p>
+                        {reward.xp > 0 ? <p className="text-sm text-[#d9c2fa]">{t("feedback.xp", { xp: reward.xp })}</p> : null}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              ) : null
+            }
+          />
         ) : (
           <fieldset className="space-y-2" disabled={locked || pending}>
             <legend className="sr-only">{exercise.title}</legend>
@@ -227,19 +208,7 @@ export function ExerciseCard({ exercise, language, locked, onSubmitCode, onSubmi
           </fieldset>
         )}
 
-        {serverError ? <p role="alert" className="rounded-xl bg-pink-100 px-4 py-2 text-sm font-medium">{t(`serverErrors.${serverError in SERVER_ERRORS ? serverError : "unexpected"}` as "serverErrors.unexpected")}</p> : null}
-
-        <AnimatePresence>
-          {reward && (
-            <motion.div initial={reduce ? false : { opacity: 0, y: 12, scale: 0.98 }} animate={{ opacity: 1, y: 0, scale: 1 }} exit={{ opacity: 0 }} transition={{ type: "spring", stiffness: 320, damping: 24 }} className="flex items-center gap-3 rounded-2xl bg-ink p-4 text-paper" role="status">
-              <Sparkle size={26} weight="fill" className="text-sun" aria-hidden />
-              <div>
-                <p className="font-bold">{reward.lesson ? t("feedback.lessonDone") : t("feedback.passed")}</p>
-                {reward.xp > 0 ? <p className="text-sm text-[#d9c2fa]">{t("feedback.xp", { xp: reward.xp })}</p> : null}
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
+        {exercise.type !== "code" && serverError ? <p role="alert" className="rounded-xl bg-pink-100 px-4 py-2 text-sm font-medium">{t(`serverErrors.${serverError in SERVER_ERRORS ? serverError : "unexpected"}` as "serverErrors.unexpected")}</p> : null}
 
         {exercise.hints.length > 0 && !passed && (
           <div className="rounded-2xl bg-violet-50 p-4 ring-1 ring-violet/20">

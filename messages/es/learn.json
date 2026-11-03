@@ -1,5 +1,8 @@
 {
-  "language": { "python": "Python", "pseudocode_es": "Pseudocódigo" },
+  "language": {
+    "python": "Python",
+    "pseudocode_es": "Pseudocódigo"
+  },
   "editor": {
     "placeholder": "Escribe tu código aquí…",
     "helper": "Teclas de ayuda para pseudocódigo",
@@ -54,7 +57,11 @@
     "showOriginal": "Ver el mensaje original de Python",
     "hideOriginal": "Ocultar el mensaje original"
   },
-  "exercise": { "number": "Ejercicio {n}", "done": "Completado", "answer": "Tu respuesta" },
+  "exercise": {
+    "number": "Ejercicio {n}",
+    "done": "Completado",
+    "answer": "Tu respuesta"
+  },
   "feedback": {
     "right": "¡Correcto!",
     "notYet": "Todavía no. Estás cerca, revisa la pista.",
@@ -69,7 +76,9 @@
     "exercise_not_found": "No encontramos este ejercicio.",
     "unexpected": "No pudimos guardar tu avance. Inténtalo de nuevo."
   },
-  "hints": { "show": "Ver pista ({n} de {total})" },
+  "hints": {
+    "show": "Ver pista ({n} de {total})"
+  },
   "tests": {
     "allPassed": "¡Todas las pruebas pasaron!",
     "notYet": "Todavía no. Revisa las pruebas marcadas.",
@@ -120,5 +129,13 @@
     "counter": "{n} de {total}",
     "prev": "Anterior",
     "next": "Siguiente"
+  },
+  "workspace": {
+    "full": "Pantalla completa",
+    "exitFull": "Salir de pantalla completa",
+    "close": "Cerrar",
+    "showOutput": "Ver resultados",
+    "results": "Resultados",
+    "closeResults": "Ocultar resultados"
   }
 }
