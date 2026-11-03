@@ -22,7 +22,19 @@
     "create": "Crear cuenta",
     "registered": "¡Tu cuenta está lista!",
     "registeredPending": "Tu cuenta se creó, pero tu correo no tiene invitación. Una fundadora debe darte acceso.",
-    "goSignIn": "Ir a entrar"
+    "goSignIn": "Ir a entrar",
+    "showPassword": "Mostrar contraseña",
+    "hidePassword": "Ocultar contraseña",
+    "demoTap": "Toca una cuenta para llenar el formulario.",
+    "demoFounder": "Fundadora",
+    "demoEducator": "Educadora",
+    "eyebrow": "Acceso del equipo",
+    "perk1": "Tus grupos y tarjetas de acceso",
+    "perk1Body": "Crea grupos, imprime códigos y PIN, desbloquea cuentas.",
+    "perk2": "Avance en tiempo real",
+    "perk2Body": "Quién practicó esta semana y en qué ejercicio va cada una.",
+    "perk3": "Logros y lecciones",
+    "perk3Body": "Edita lecciones y propone proyectos para el muro de Logros."
   },
   "shell": {
     "nav": "Navegación del equipo",
@@ -41,7 +53,11 @@
     "roleFounder": "Fundadora",
     "roleEducator": "Educadora",
     "founderOnly": "Solo fundadoras",
-    "signOut": "Salir"
+    "signOut": "Salir",
+    "sectionProgram": "Programa",
+    "sectionTools": "Herramientas",
+    "more": "Más",
+    "close": "Cerrar"
   },
   "panel": {
     "title": "¡Hola, {name}!",
@@ -384,7 +400,8 @@
     "unpublish": "Retirar",
     "reject": "No publicar",
     "delete": "Borrar",
-    "done": "Listo"
+    "done": "Listo",
+    "emptyBody": "Cuando una estudiante termine un proyecto, nomínalo desde su perfil y aparecerá aquí."
   },
   "errorsPage": {
     "title": "Errores amigables",

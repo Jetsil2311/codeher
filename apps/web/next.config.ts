@@ -19,6 +19,7 @@ const csp = [
 ].join("; ");
 
 const nextConfig: NextConfig = {
+  devIndicators: false,
   transpilePackages: ["@codeher/core", "@codeher/grader"],
   poweredByHeader: false,
   async headers() {

@@ -1,17 +1,22 @@
 "use client";
 import Link from "next/link";
-import { useActionState } from "react";
+import { useActionState, useState } from "react";
 import { useTranslations } from "next-intl";
-import { ArrowRight, GoogleLogo } from "@phosphor-icons/react/dist/ssr";
+import { ArrowRight, Eye, EyeSlash, GoogleLogo, UserCircle } from "@phosphor-icons/react/dist/ssr";
 import { staffRegisterAction, staffSignInAction } from "@/app/actions/staff";
 import { Field, inputClass } from "@/components/ui";
 
-export function StaffSignInForm({ googleEnabled }: { googleEnabled: boolean }) {
+export function StaffSignInForm({ googleEnabled, demo }: { googleEnabled: boolean; demo?: { label: string; email: string; password: string }[] }) {
   const t = useTranslations("staff.auth");
   const te = useTranslations("errors");
   const [state, action, pending] = useActionState(staffSignInAction, {});
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [show, setShow] = useState(false);
   return (
-    <div className="tile space-y-5 p-6 md:p-8">
+    <>
+    <div className="tile relative space-y-5 overflow-hidden rounded-[1.75rem] p-6 md:p-8">
+      <span className="absolute inset-x-0 top-0 h-1.5 bg-grad" aria-hidden />
       <button type="button" disabled={!googleEnabled} className="inline-flex h-12 w-full items-center justify-center gap-2 rounded-full bg-white font-semibold text-ink ring-1 ring-ink/15 transition hover:bg-violet-50 disabled:opacity-50" aria-describedby={googleEnabled ? undefined : "google-note"}>
         <GoogleLogo size={20} weight="bold" aria-hidden /> {t("google")}
       </button>
@@ -21,10 +26,15 @@ export function StaffSignInForm({ googleEnabled }: { googleEnabled: boolean }) {
       </div>
       <form action={action} className="space-y-4">
         <Field label={t("email")} htmlFor="email">
-          <input id="email" name="email" type="email" required autoComplete="email" className={inputClass} />
+          <input id="email" name="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} required autoComplete="email" className={inputClass} />
         </Field>
         <Field label={t("password")} htmlFor="password">
-          <input id="password" name="password" type="password" required autoComplete="current-password" className={inputClass} />
+          <div className="relative">
+            <input id="password" name="password" type={show ? "text" : "password"} value={password} onChange={(e) => setPassword(e.target.value)} required autoComplete="current-password" className={`${inputClass} pr-14`} />
+            <button type="button" onClick={() => setShow((v) => !v)} aria-pressed={show} aria-label={show ? t("hidePassword") : t("showPassword")} className="absolute right-1.5 top-1.5 grid size-9 place-items-center rounded-xl text-ink-muted hover:bg-violet-100 hover:text-ink">
+              {show ? <EyeSlash size={20} aria-hidden /> : <Eye size={20} aria-hidden />}
+            </button>
+          </div>
         </Field>
         {state.error ? <p role="alert" className="rounded-2xl bg-pink-100 px-4 py-3 text-sm font-medium">{te(state.error as "invalid_credentials")}</p> : null}
         <button type="submit" disabled={pending} className="inline-flex h-12 w-full items-center justify-center gap-2 rounded-full bg-violet-700 font-semibold text-white transition hover:bg-violet-800 active:scale-[0.98] disabled:opacity-60">
@@ -38,6 +48,24 @@ export function StaffSignInForm({ googleEnabled }: { googleEnabled: boolean }) {
         </Link>
       </p>
     </div>
+    {demo && demo.length > 0 && (
+      <aside className="mt-4 rounded-[1.4rem] border border-dashed border-violet/40 bg-white/80 p-4 text-sm text-ink-soft backdrop-blur">
+        <p className="font-bold text-ink">{t("demoTitle")}</p>
+        <p className="mt-0.5 text-xs text-ink-muted">{t("demoTap")}</p>
+        <div className="mt-3 grid gap-2 sm:grid-cols-2">
+          {demo.map((d) => (
+            <button key={d.email} type="button" onClick={() => { setEmail(d.email); setPassword(d.password); }} className="flex items-center gap-2.5 rounded-2xl bg-paper p-2.5 text-left ring-1 ring-ink/[0.06] transition hover:bg-violet-50 hover:ring-violet/30 active:scale-[0.98]">
+              <span className="grid size-9 shrink-0 place-items-center rounded-xl bg-grad text-white"><UserCircle size={20} weight="fill" aria-hidden /></span>
+              <span className="min-w-0">
+                <span className="block font-bold text-ink">{d.label}</span>
+                <span className="block truncate font-mono text-[0.7rem]">{d.email}</span>
+              </span>
+            </button>
+          ))}
+        </div>
+      </aside>
+    )}
+    </>
   );
 }
 

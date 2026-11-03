@@ -6,7 +6,8 @@
 import { useCallback, useEffect, useRef, useState, type ReactNode } from "react";
 import { createPortal } from "react-dom";
 import { useTranslations } from "next-intl";
-import { ArrowsOut, Bug, CaretDown, CaretUp, MagicWand, Play, Stop, Terminal, TextAlignLeft, X } from "@phosphor-icons/react/dist/ssr";
+import { AnimatePresence, motion, useReducedMotion } from "motion/react";
+import { ArrowsOut, Bug, CaretDown, Keyboard, MagicWand, Play, Stop, Terminal, X } from "@phosphor-icons/react/dist/ssr";
 import type { CodeLanguage, RawError } from "@codeher/core";
 import { format as formatPseudo } from "@codeher/grader/pseudo";
 import { LanguageBadge, cx } from "@/components/ui";
@@ -64,6 +65,15 @@ export function CodeWorkspace(props: CodeWorkspaceProps) {
   const [stdinText, setStdinText] = useState("");
   const [mounted, setMounted] = useState(false);
   const r = useCodeRun(language);
+  const reduce = useReducedMotion();
+  const [wide, setWide] = useState(false);
+  useEffect(() => {
+    const mq = window.matchMedia("(min-width: 1024px)");
+    const on = () => setWide(mq.matches);
+    on();
+    mq.addEventListener("change", on);
+    return () => mq.removeEventListener("change", on);
+  }, []);
   const isPseudo = language === "pseudocode_es";
   const debugging = r.mode === "debug" && (r.snap.state === "stepping" || r.snap.state === "waiting");
   const running = r.mode === "run" && (r.snap.state === "running" || r.snap.state === "waiting");
@@ -108,14 +118,22 @@ export function CodeWorkspace(props: CodeWorkspaceProps) {
   const iconBtn = "grid size-10 place-items-center rounded-xl text-[#d6cdea] transition hover:bg-white/10 hover:text-paper active:scale-95";
 
   const header = (
-    <div className="flex items-center gap-2 border-b border-white/8 bg-midnight-2 px-3 py-2">
-      <LanguageBadge language={language} label={t(`language.${language}`)} tone="dark" size="sm" />
-      {title && (showTitle || full) ? <span className="min-w-0 truncate text-sm font-semibold text-paper">{title}</span> : null}
+    <div className="flex items-center gap-2 border-b border-white/[0.07] bg-gradient-to-b from-midnight-2 to-[#1e1540] px-3 py-2">
+      <span className="mr-1 hidden items-center gap-1.5 sm:flex" aria-hidden>
+        <span className="size-2.5 rounded-full bg-pink" />
+        <span className="size-2.5 rounded-full bg-sun" />
+        <span className="size-2.5 rounded-full bg-mint" />
+      </span>
+      <span className={headerExtra ? "hidden sm:inline-flex" : "inline-flex"}>
+        <LanguageBadge language={language} label={t(`language.${language}`)} tone="dark" size="sm" />
+      </span>
+      {headerExtra && title ? <span className="min-w-0 truncate font-mono text-xs text-[#b8acd6] sm:hidden">{title}</span> : null}
+      {title && (showTitle || full) ? <span className={cx("min-w-0 truncate text-sm font-semibold text-paper", headerExtra ? "hidden sm:inline" : "")}>{title}</span> : null}
       <span className="ml-auto flex items-center gap-0.5">
         {headerExtra}
         {!isPseudo && !readOnly && (
           <button type="button" onClick={() => setShowInputs((v) => !v)} aria-pressed={showInputs} title={t("console.inputsTitle")} aria-label={t("console.inputsTitle")} className={cx(iconBtn, showInputs && "bg-white/12 text-paper")}>
-            <TextAlignLeft size={19} weight="bold" aria-hidden />
+            <Keyboard size={19} weight="bold" aria-hidden />
           </button>
         )}
         {isPseudo && !readOnly && (
@@ -138,12 +156,12 @@ export function CodeWorkspace(props: CodeWorkspaceProps) {
   );
 
   const inputs = !isPseudo && showInputs && (
-    <div className="border-b border-white/8 bg-midnight-2 px-3 pb-3">
+    <motion.div initial={reduce ? false : { opacity: 0, y: -6 }} animate={{ opacity: 1, y: 0 }} className="border-b border-white/8 bg-midnight-2 px-3 pb-3 pt-2">
       <label htmlFor="ws-stdin" className="mb-1 block text-xs font-semibold text-[#b8acd6]">
         {t("console.inputsTitle")}
       </label>
       <textarea id="ws-stdin" value={stdinText} onChange={(e) => setStdinText(e.target.value)} rows={2} placeholder={t("console.inputsPlaceholder")} className="w-full rounded-xl bg-white/8 px-3 py-2 font-mono text-sm text-paper placeholder:text-[#8f84b0] focus:outline-none focus:ring-2 focus:ring-pink" />
-    </div>
+    </motion.div>
   );
 
   // With a primary action (Comprobar) the secondary ones become compact icons on phones.
@@ -156,8 +174,10 @@ export function CodeWorkspace(props: CodeWorkspaceProps) {
           <Stop size={18} weight="fill" aria-hidden /> {label(t("actions.stop"))}
         </button>
       ) : (
-        <button type="button" onClick={run} title={t("actions.run")} className={cx("inline-flex h-11 shrink-0 items-center justify-center gap-2 rounded-full font-semibold transition active:scale-95", compact ? "w-11 bg-white/10 text-paper ring-1 ring-white/15 hover:bg-white/15 sm:w-auto sm:px-5" : "bg-pink px-5 text-ink shadow-[var(--shadow-pop)]")}>
-          <Play size={18} weight="fill" aria-hidden /> {label(t("actions.run"))}
+        <button type="button" onClick={run} title={t("actions.run")} className={cx("group relative inline-flex h-11 shrink-0 items-center justify-center gap-2 overflow-hidden rounded-full font-bold transition active:scale-95", compact ? "w-11 bg-white/10 text-paper ring-1 ring-white/15 hover:bg-white/15 sm:w-auto sm:px-5" : "bg-pink px-5 text-ink shadow-[var(--shadow-pop)] hover:bg-[#f36cbd]")}>
+          {!compact && <span className="absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/50 to-transparent transition-transform duration-700 group-hover:translate-x-full" aria-hidden />}
+          <Play size={18} weight="fill" className="relative" aria-hidden /> <span className="relative">{label(t("actions.run"))}</span>
+          {!compact && <kbd className="relative ml-1 hidden rounded-md bg-ink/10 px-1.5 py-0.5 font-mono text-[0.65rem] font-medium lg:inline">Ctrl ↵</kbd>}
         </button>
       )}
       {primary && (
@@ -209,23 +229,40 @@ export function CodeWorkspace(props: CodeWorkspaceProps) {
     <>
       {header}
       {inputs}
-      <div className="relative min-h-0 flex-1 overflow-hidden">{editor(undefined, true)}</div>
-      {hasOutput && sheet !== "closed" && (
-        <section aria-label={t("workspace.results")} className={cx("flex shrink-0 flex-col border-t border-white/10 bg-[#140c2e] transition-[height] duration-300 ease-[var(--ease-out-soft)]", sheet === "open" ? "h-[46%]" : "h-14")}>
-          <div className="flex h-14 shrink-0 items-center gap-2 pl-4 pr-2">
-            <button type="button" onClick={() => setSheet(sheet === "open" ? "peek" : "open")} aria-expanded={sheet === "open"} className="flex h-full flex-1 items-center gap-2 text-left">
-              <Terminal size={18} weight="bold" className="text-pink" aria-hidden />
-              <span className="text-sm font-bold">{t("workspace.results")}</span>
-              {running ? <span className="text-xs text-mint">{t("console.running")}</span> : null}
-              {sheet === "open" ? <CaretDown size={16} weight="bold" className="text-[#b8acd6]" aria-hidden /> : <CaretUp size={16} weight="bold" className="text-[#b8acd6]" aria-hidden />}
-            </button>
-            <button type="button" onClick={() => setSheet("closed")} aria-label={t("workspace.closeResults")} className="grid size-10 place-items-center rounded-xl text-[#d6cdea] hover:bg-white/10">
-              <X size={18} weight="bold" aria-hidden />
-            </button>
-          </div>
-          {sheet === "open" && <div className="min-h-0 flex-1 overflow-y-auto px-3 pb-4 text-ink">{resultsBody}</div>}
-        </section>
-      )}
+      <div className="flex min-h-0 flex-1 flex-col lg:flex-row">
+      <div className="relative min-h-0 min-w-0 flex-1 overflow-hidden">{editor(undefined, true)}</div>
+      <AnimatePresence initial={false}>
+        {hasOutput && sheet !== "closed" && (
+          <motion.section
+            key={wide ? "results-side" : "results"}
+            aria-label={t("workspace.results")}
+            initial={reduce ? false : wide ? { width: 0, opacity: 0 } : { height: 0, opacity: 0 }}
+            animate={wide ? { width: sheet === "open" ? "42%" : 260, opacity: 1 } : { height: sheet === "open" ? "46%" : 56, opacity: 1 }}
+            exit={reduce ? { opacity: 0 } : wide ? { width: 0, opacity: 0 } : { height: 0, opacity: 0 }}
+            transition={{ type: "spring", stiffness: 380, damping: 38 }}
+            className={cx("flex shrink-0 flex-col overflow-hidden bg-[#140c2e]", wide ? "border-l border-white/10" : "rounded-t-[1.25rem] border-t border-white/10 shadow-[0_-14px_30px_-18px_rgb(0_0_0/0.8)]")}
+          >
+            <div className="flex h-14 shrink-0 items-center gap-2 pl-4 pr-2">
+              <button type="button" onClick={() => setSheet(sheet === "open" ? "peek" : "open")} aria-expanded={sheet === "open"} className="flex h-full flex-1 items-center gap-2 text-left">
+                <span className="relative grid size-7 place-items-center rounded-lg bg-pink/15">
+                  <Terminal size={16} weight="bold" className="text-pink" aria-hidden />
+                  {running && <span className="absolute -right-0.5 -top-0.5 size-2 rounded-full bg-mint motion-safe:animate-pulse" aria-hidden />}
+                </span>
+                <span className="text-sm font-bold">{t("workspace.results")}</span>
+                {running ? <span className="text-xs text-mint">{t("console.running")}</span> : null}
+                <motion.span animate={{ rotate: sheet === "open" ? 0 : 180 }} className="inline-flex text-[#b8acd6]">
+                  <CaretDown size={16} weight="bold" aria-hidden />
+                </motion.span>
+              </button>
+              <button type="button" onClick={() => setSheet("closed")} aria-label={t("workspace.closeResults")} className="grid size-10 place-items-center rounded-xl text-[#d6cdea] hover:bg-white/10">
+                <X size={18} weight="bold" aria-hidden />
+              </button>
+            </div>
+            {(sheet === "open" || wide) && <div className="min-h-0 flex-1 overflow-y-auto px-3 pb-4 text-ink">{resultsBody}</div>}
+          </motion.section>
+        )}
+      </AnimatePresence>
+      </div>
       <div className="flex shrink-0 items-center gap-2 border-t border-white/8 bg-midnight-2 px-3 py-2.5">
         <div className="min-w-0 flex-1">{actions}</div>
         {hasOutput && sheet === "closed" && (
@@ -239,9 +276,9 @@ export function CodeWorkspace(props: CodeWorkspaceProps) {
 
   const fullscreen = full && mounted
     ? createPortal(
-        <div role="dialog" aria-modal="true" aria-label={title ?? t("workspace.full")} className="fixed inset-0 z-[90] flex flex-col bg-midnight pb-[env(safe-area-inset-bottom)] pt-[env(safe-area-inset-top)] text-paper">
+        <motion.div role="dialog" aria-modal="true" aria-label={title ?? t("workspace.full")} initial={reduce ? false : { opacity: 0, scale: 0.97, y: 16 }} animate={{ opacity: 1, scale: 1, y: 0 }} transition={{ type: "spring", stiffness: 380, damping: 34 }} className="fixed inset-0 z-[90] flex flex-col bg-midnight pb-[env(safe-area-inset-bottom)] pt-[env(safe-area-inset-top)] text-paper">
           {split}
-        </div>,
+        </motion.div>,
         document.body,
       )
     : null;
@@ -264,19 +301,33 @@ export function CodeWorkspace(props: CodeWorkspaceProps) {
         {editor(minHeight, false)}
         <div className="border-t border-white/8 bg-midnight-2 px-3 py-2.5">{actions}</div>
       </div>
-      {hasOutput && sheet !== "closed" && (
-        <div className="mt-3 rounded-[1.25rem] bg-white p-3 ring-1 ring-line">
-          <div className="mb-2 flex items-center justify-between px-1">
-            <span className="flex items-center gap-2 text-sm font-bold text-ink">
-              <Terminal size={17} weight="bold" className="text-violet-700" aria-hidden /> {t("workspace.results")}
-            </span>
-            <button type="button" onClick={() => setSheet("closed")} aria-label={t("workspace.closeResults")} className="grid size-9 place-items-center rounded-xl text-ink-muted hover:bg-violet-100">
-              <X size={16} weight="bold" aria-hidden />
-            </button>
-          </div>
-          {resultsBody}
-        </div>
-      )}
+      <AnimatePresence initial={false}>
+        {hasOutput && sheet !== "closed" && (
+          <motion.div
+            key="inline-results"
+            initial={reduce ? false : { opacity: 0, y: -8, height: 0 }}
+            animate={{ opacity: 1, y: 0, height: "auto" }}
+            exit={reduce ? { opacity: 0 } : { opacity: 0, y: -8, height: 0 }}
+            transition={{ type: "spring", stiffness: 380, damping: 36 }}
+            className="overflow-hidden"
+          >
+            <div className="mt-3 rounded-[1.25rem] bg-white p-3 shadow-[var(--shadow-tile)] ring-1 ring-ink/[0.06]">
+              <div className="mb-2 flex items-center justify-between px-1">
+                <span className="flex items-center gap-2 text-sm font-bold text-ink">
+                  <span className="grid size-7 place-items-center rounded-lg bg-violet-100">
+                    <Terminal size={16} weight="bold" className="text-violet-700" aria-hidden />
+                  </span>
+                  {t("workspace.results")}
+                </span>
+                <button type="button" onClick={() => setSheet("closed")} aria-label={t("workspace.closeResults")} className="grid size-9 place-items-center rounded-xl text-ink-muted hover:bg-violet-100">
+                  <X size={16} weight="bold" aria-hidden />
+                </button>
+              </div>
+              {resultsBody}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
       {hasOutput && sheet === "closed" && (
         <button type="button" onClick={() => setSheet("open")} className="mt-2 inline-flex items-center gap-1.5 text-sm font-semibold text-violet-700 hover:underline">
           <Terminal size={16} weight="bold" aria-hidden /> {t("workspace.showOutput")}

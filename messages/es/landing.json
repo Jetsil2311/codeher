@@ -130,7 +130,8 @@
     "clear": "Quitar filtros",
     "readOnly": "Puedes ejecutar este proyecto. Los cambios no se guardan.",
     "back": "Volver a Logros",
-    "noCode": "Este logro no incluye código."
+    "noCode": "Este logro no incluye código.",
+    "close": "Cerrar"
   },
   "probarPage": {
     "title": "Prueba",
@@ -167,7 +168,16 @@
     "tips": "Consejos",
     "tip1": "Ctrl + Enter ejecuta tu programa.",
     "tip2": "En pseudocódigo, Paso a paso muestra cada variable mientras cambia.",
-    "tip3": "En Python, escribe en Entradas los datos que pedirá input()."
+    "tip3": "En Python, escribe en Entradas los datos que pedirá input().",
+    "saveShort": "Guardar",
+    "close": "Cerrar",
+    "examplesBody": "Toca uno para cargarlo en {lang}. Tu borrador actual se reemplaza.",
+    "exampleDesc": {
+      "hola": "Pide tu nombre y te saluda",
+      "ciclo": "Repite una instrucción 5 veces",
+      "adivina": "Un juego de adivinar con azar",
+      "tabla": "La tabla del 7 con un ciclo"
+    }
   },
   "faq": {
     "title": "Preguntas",

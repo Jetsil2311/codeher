@@ -1,38 +1,22 @@
 import Link from "next/link";
 import { getTranslations } from "next-intl/server";
 import { Wordmark } from "@/components/brand/Wordmark";
-import { ButtonLink } from "@/components/ui";
-import { MobileMenu } from "./MobileMenu";
-import { NavLink } from "./NavLink";
+import { PublicNav, type PublicLink } from "./PublicNav";
 
 export async function PublicHeader() {
   const t = await getTranslations("common.nav");
-  const links = [
-    { href: "/probar", label: t("probar") },
-    { href: "/laboratorio", label: t("lab") },
-    { href: "/logros", label: t("logros") },
-    { href: "/#como-funciona", label: t("how") },
-    { href: "/#lleva-codeher", label: t("bring") },
+  const links: PublicLink[] = [
+    { href: "/probar", label: t("probar"), desc: t("desc.probar"), icon: "probar" },
+    { href: "/laboratorio", label: t("lab"), desc: t("desc.lab"), icon: "lab" },
+    { href: "/logros", label: t("logros"), desc: t("desc.logros"), icon: "logros" },
+    { href: "/#como-funciona", label: t("how"), desc: t("desc.how"), icon: "how" },
+    { href: "/#lleva-codeher", label: t("bring"), desc: t("desc.bring"), icon: "bring" },
   ];
   return (
-    <header className="sticky top-0 z-40 border-b border-ink/[0.06] bg-white/[0.92] backdrop-blur-xl">
-      <div className="mx-auto flex h-16 max-w-7xl items-center justify-between gap-3 px-4 md:px-6">
-        <Wordmark size={23} />
-        <nav aria-label={t("main")} className="hidden items-center gap-0.5 lg:flex">
-          {links.map((l) => (
-            <NavLink key={l.href} href={l.href} variant="top">
-              {l.label}
-            </NavLink>
-          ))}
-        </nav>
-        <div className="flex items-center gap-2">
-          <ButtonLink href="/entrar" size="md">
-            {t("entrar")}
-          </ButtonLink>
-          <MobileMenu links={links} label={t("menu")} closeLabel={t("close")} cta={{ href: "/entrar", label: t("entrar") }} secondary={{ href: "/probar", label: t("probar") }} />
-        </div>
-      </div>
-    </header>
+    <PublicNav
+      links={links}
+      labels={{ main: t("main"), menu: t("menu"), close: t("close"), entrar: t("entrar"), probar: t("probarCta"), staff: t("staff"), tagline: t("tagline") }}
+    />
   );
 }
 

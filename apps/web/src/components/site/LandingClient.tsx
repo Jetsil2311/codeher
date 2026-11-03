@@ -1,11 +1,12 @@
 "use client";
 import { useActionState, useState } from "react";
 import { useTranslations } from "next-intl";
-import { CheckCircle, PaperPlaneTilt } from "@phosphor-icons/react/dist/ssr";
+import { CheckCircle, PaperPlaneTilt, TerminalWindow, TextAa } from "@phosphor-icons/react/dist/ssr";
+import { Segmented } from "@/components/motion/Segmented";
 import type { CodeLanguage } from "@codeher/core";
 import { Playground } from "@/components/code/Playground";
 import { contactAction } from "@/app/actions/public";
-import { Field, inputClass, textareaClass, cx } from "@/components/ui";
+import { Field, inputClass, textareaClass } from "@/components/ui";
 
 const TEASER: Record<CodeLanguage, string> = {
   pseudocode_es: `Proceso Saludo
@@ -28,13 +29,17 @@ export function TeaserEditor() {
   const [lang, setLang] = useState<CodeLanguage>("pseudocode_es");
   return (
     <div>
-      <div role="tablist" aria-label={t("tabs")} className="mb-3 inline-flex rounded-full bg-white/8 p-1 ring-1 ring-white/10">
-        {(["pseudocode_es", "python"] as const).map((l) => (
-          <button key={l} role="tab" aria-selected={lang === l} type="button" onClick={() => setLang(l)} className={cx("h-9 rounded-full px-4 text-sm font-semibold transition", lang === l ? "bg-paper text-ink" : "text-[#d6cdea] hover:text-paper")}>
-            {tl(l)}
-          </button>
-        ))}
-      </div>
+      <Segmented
+        label={t("tabs")}
+        tone="dark"
+        value={lang}
+        onChange={setLang}
+        className="mb-3"
+        options={[
+          { value: "pseudocode_es", label: tl("pseudocode_es"), icon: <TextAa size={16} weight="bold" aria-hidden /> },
+          { value: "python", label: tl("python"), icon: <TerminalWindow size={16} weight="bold" aria-hidden /> },
+        ]}
+      />
       <Playground key={lang} language={lang} code={TEASER[lang]} minHeight={190} compact className="[&>div:first-child]:shadow-[0_30px_60px_-30px_rgb(0_0_0/0.7)] [&>div:first-child]:ring-white/10" />
     </div>
   );

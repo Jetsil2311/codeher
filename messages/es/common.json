@@ -14,7 +14,17 @@
     "menu": "Abrir menú",
     "close": "Cerrar menú",
     "lab": "Laboratorio",
-    "primaryCta": "Entrar"
+    "primaryCta": "Entrar",
+    "probarCta": "Probar una lección",
+    "staff": "Equipo",
+    "tagline": "Programar es para ti.",
+    "desc": {
+      "probar": "Lecciones cortas, sin registrarte",
+      "lab": "Escribe y ejecuta código libre",
+      "logros": "Proyectos de nuestras estudiantes",
+      "how": "Las cinco fases del programa",
+      "bring": "Lleva CODEHER a tu comunidad"
+    }
   },
   "footer": {
     "tagline": "Programación para chicas y adolescentes del Estado de México. Aprende, crea y presenta tus proyectos en tu comunidad.",
@@ -33,5 +43,12 @@
     "body": "Estás usando datos de prueba guardados en esta computadora."
   },
   "never": "Nunca",
-  "back": "Volver"
+  "back": "Volver",
+  "notFound": {
+    "title": "No encontramos esta página",
+    "body": "Puede que el enlace esté mal escrito o que la página ya no exista. No pasa nada: todavía no, y luego sí.",
+    "code": "Página no encontrada",
+    "home": "Ir al inicio",
+    "lessons": "Ver lecciones"
+  }
 }

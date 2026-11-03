@@ -1,3 +1,4 @@
+import { ArrowsClockwise, BookOpen, CheckCircle, Star } from "@phosphor-icons/react/dist/ssr";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getTranslations } from "next-intl/server";
@@ -24,11 +25,11 @@ export default async function Estudiante({ params }: { params: Promise<{ id: str
         title={<span className="inline-flex items-center gap-3"><Avatar id={s.avatar} size={44} /> {s.nickname}</span>}
         subtitle={<><span className="font-mono font-bold">{s.code}</span> · {s.group.community} · {t("lastActivity", { when: relTime(s.last_active_at, tc("never")) })} {s.status === "inactive" ? <Tag tone="line" className="ml-2">{t("inactive")}</Tag> : null} {s.locked ? <Tag tone="pink" className="ml-1">{t("locked")}</Tag> : null}</>}
       />
-      <div className="grid gap-4 sm:grid-cols-4">
-        <Stat label={t("lessons")} value={s.stats.lessons_completed} tone="ink" />
-        <Stat label={t("exercises")} value={s.stats.exercises_passed} />
-        <Stat label={t("attempts")} value={s.stats.attempts} />
-        <Stat label="XP" value={s.stats.xp} hint={t("streak", { n: s.stats.streak })} tone="violet" />
+      <div className="grid grid-cols-2 gap-3 md:gap-4 lg:grid-cols-4">
+        <Stat label={t("lessons")} value={s.stats.lessons_completed} tone="ink" icon={<BookOpen size={19} weight="fill" aria-hidden />} />
+        <Stat label={t("exercises")} value={s.stats.exercises_passed} icon={<CheckCircle size={19} weight="fill" aria-hidden />} />
+        <Stat label={t("attempts")} value={s.stats.attempts} icon={<ArrowsClockwise size={19} weight="fill" aria-hidden />} />
+        <Stat label="XP" value={s.stats.xp} icon={<Star size={19} weight="fill" aria-hidden />} hint={t("streak", { n: s.stats.streak })} tone="violet" />
       </div>
       <div className="mt-6 grid gap-6 lg:grid-cols-[1.3fr_1fr]">
         <div className="space-y-6">

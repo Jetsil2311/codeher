@@ -2,9 +2,13 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
-import { ArrowCounterClockwise, CheckCircle, FloppyDisk } from "@phosphor-icons/react/dist/ssr";
+import { AnimatePresence, motion } from "motion/react";
+import { ArrowCounterClockwise, ArrowRight, Books, CheckCircle, FloppyDisk, HandWaving, Repeat, DiceFive, GridNine, TerminalWindow, TextAa } from "@phosphor-icons/react/dist/ssr";
 import type { CodeLanguage } from "@codeher/core";
 import { CodeWorkspace } from "@/components/code/CodeWorkspace";
+import { Segmented } from "@/components/motion/Segmented";
+import { Sheet } from "@/components/motion/Sheet";
+import { Stagger, StaggerItem } from "@/components/motion/Motion";
 import { createProjectAction } from "@/app/actions/student";
 import { cx } from "@/components/ui";
 
@@ -21,6 +25,12 @@ const EXAMPLES: Record<CodeLanguage, Record<string, string>> = {
     adivina: 'import random\n\nsecreto = random.randint(1, 10)\nintento = int(input("Adivina un número del 1 al 10: "))\nif intento == secreto:\n    print("¡Lo lograste!")\nelse:\n    print("Era el", secreto)\n',
     tabla: 'n = 7\nfor i in range(1, 11):\n    print(n, "x", i, "=", n * i)\n',
   },
+};
+const EX_META: Record<string, { Icon: typeof HandWaving; tone: string }> = {
+  hola: { Icon: HandWaving, tone: "from-violet to-pink" },
+  ciclo: { Icon: Repeat, tone: "from-[#00bbf9] to-violet" },
+  adivina: { Icon: DiceFive, tone: "from-pink to-[#ff9f6b]" },
+  tabla: { Icon: GridNine, tone: "from-[#00c9a7] to-[#00bbf9]" },
 };
 
 const KEY = (l: CodeLanguage) => `codeher.lab.${l}`;
@@ -47,6 +57,7 @@ export function Laboratorio({ signedIn }: { signedIn: boolean }) {
   const [version, setVersion] = useState(0);
   const [saved, setSaved] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  const [examples, setExamples] = useState(false);
 
   useEffect(() => {
     const d = loadDraft(lang);
@@ -54,6 +65,11 @@ export function Laboratorio({ signedIn }: { signedIn: boolean }) {
     setVersion((v) => v + 1);
     setSaved(null);
   }, [lang]);
+  useEffect(() => {
+    if (!saved) return;
+    const id = setTimeout(() => setSaved(null), 6000);
+    return () => clearTimeout(id);
+  }, [saved]);
 
   const save = async () => {
     setBusy(true);
@@ -61,63 +77,118 @@ export function Laboratorio({ signedIn }: { signedIn: boolean }) {
     setBusy(false);
     if (r.ok) setSaved(r.data);
   };
-
   const load = (c: string) => {
     setCode(c);
     saveDraft(lang, c);
     setVersion((v) => v + 1);
   };
 
-  return (
-    <div className="flex h-full min-h-0 flex-col gap-3">
-      <div className="flex items-center gap-2">
-        <div role="tablist" aria-label={t("language")} className="inline-flex shrink-0 rounded-full bg-white p-1 ring-1 ring-ink/[0.08]">
-          {(["pseudocode_es", "python"] as const).map((l) => (
-            <button key={l} role="tab" aria-selected={lang === l} type="button" onClick={() => setLang(l)} className={cx("h-9 rounded-full px-3 text-sm font-semibold transition sm:px-4", lang === l ? "bg-violet-700 text-white" : "text-ink-soft hover:bg-violet-50")}>
-              {tl(l)}
-            </button>
-          ))}
-        </div>
-        <label htmlFor="lab-example" className="sr-only">{t("examples")}</label>
-        <select id="lab-example" value="" onChange={(e) => e.target.value && load(EXAMPLES[lang][e.target.value])} className="h-11 min-w-0 flex-1 rounded-full bg-white px-4 text-sm font-semibold text-ink ring-1 ring-ink/[0.08] focus:outline-none focus:ring-2 focus:ring-violet-700 sm:max-w-48 sm:flex-none">
-          <option value="">{t("examples")}</option>
-          {Object.keys(EXAMPLES[lang]).map((k) => (
-            <option key={k} value={k}>{t(`exampleNames.${k}` as "exampleNames.hola")}</option>
-          ))}
-        </select>
-        <button type="button" onClick={() => load(EXAMPLES[lang].hola)} aria-label={t("reset")} title={t("reset")} className="grid size-11 shrink-0 place-items-center rounded-full bg-white text-ink-soft ring-1 ring-ink/[0.08] hover:text-ink sm:hidden">
-          <ArrowCounterClockwise size={18} weight="bold" aria-hidden />
+  const hb = "inline-flex h-10 items-center justify-center gap-1.5 rounded-xl text-sm font-semibold text-[#d6cdea] transition hover:bg-white/10 hover:text-paper active:scale-95";
+  const headerExtra = (
+    <>
+      <button type="button" onClick={() => setExamples(true)} title={t("examples")} aria-label={t("examples")} className={cx(hb, "w-10 md:w-auto md:px-3")}>
+        <Books size={19} weight="bold" aria-hidden /> <span className="hidden md:inline">{t("examples")}</span>
+      </button>
+      <button type="button" onClick={() => load(EXAMPLES[lang].hola)} title={t("reset")} aria-label={t("reset")} className={cx(hb, "w-10")}>
+        <ArrowCounterClockwise size={18} weight="bold" aria-hidden />
+      </button>
+      {signedIn ? (
+        <button type="button" disabled={busy} onClick={save} title={t("save")} aria-label={t("save")} className={cx(hb, "w-10 disabled:opacity-50 md:w-auto md:px-3")}>
+          <FloppyDisk size={19} weight="bold" aria-hidden /> <span className="hidden md:inline">{t("saveShort")}</span>
         </button>
-        <button type="button" onClick={() => load(EXAMPLES[lang].hola)} className="hidden h-11 items-center gap-1.5 rounded-full px-3 text-sm font-semibold text-ink-soft hover:bg-white sm:inline-flex">
-          <ArrowCounterClockwise size={16} weight="bold" aria-hidden /> {t("reset")}
-        </button>
-        <div className="ml-auto hidden sm:block">
-          {signedIn ? (
-            saved ? (
-              <Link href={`/app/proyectos/${saved}`} className="inline-flex h-12 items-center gap-1.5 rounded-full bg-[#d9fbf5] px-4 text-sm font-semibold text-mint-700">
-                <CheckCircle size={18} weight="fill" aria-hidden /> {t("saved")} {t("open")}
-              </Link>
-            ) : (
-              <button type="button" disabled={busy} onClick={save} className="inline-flex h-12 items-center gap-1.5 rounded-full bg-violet-700 px-4 text-sm font-semibold text-white disabled:opacity-50">
-                <FloppyDisk size={18} weight="bold" aria-hidden /> {t("save")}
-              </button>
-            )
-          ) : (
-            <Link href="/entrar" className="text-sm font-semibold text-violet-700 underline underline-offset-4">{t("signInToSave")}</Link>
-          )}
-        </div>
-      </div>
-      {!signedIn && <Link href="/entrar" className="text-sm font-semibold text-violet-700 underline underline-offset-4 sm:hidden">{t("signInToSave")}</Link>}
-      {signedIn && (
-        <div className="sm:hidden">
-          {saved ? (
-            <Link href={`/app/proyectos/${saved}`} className="inline-flex h-10 items-center gap-1.5 rounded-full bg-[#d9fbf5] px-4 text-sm font-semibold text-mint-700"><CheckCircle size={18} weight="fill" aria-hidden /> {t("saved")} {t("open")}</Link>
-          ) : (
-            <button type="button" disabled={busy} onClick={save} className="inline-flex h-10 items-center gap-1.5 rounded-full bg-violet-700 px-4 text-sm font-semibold text-white disabled:opacity-50"><FloppyDisk size={18} weight="bold" aria-hidden /> {t("save")}</button>
-          )}
-        </div>
+      ) : (
+        <Link href="/entrar" title={t("signInToSave")} aria-label={t("signInToSave")} className={cx(hb, "w-10 md:w-auto md:px-3")}>
+          <FloppyDisk size={19} weight="bold" aria-hidden /> <span className="hidden md:inline">{t("saveShort")}</span>
+        </Link>
       )}
-      <CodeWorkspace key={`${lang}-${version}`} language={lang} code={code} onCodeChange={(c) => { setCode(c); saveDraft(lang, c); }} fill allowFullscreen title={lang === "python" ? "laboratorio.py" : "laboratorio.pseudo"} className="min-h-[420px] flex-1" />
+      <span className="mx-1 h-6 w-px bg-white/10" aria-hidden />
+    </>
+  );
+
+  return (
+    <div className="relative flex h-full min-h-0 flex-col gap-3">
+      <div className="flex items-center gap-3">
+        <Segmented
+          label={t("language")}
+          value={lang}
+          onChange={setLang}
+          className="w-full sm:w-auto"
+          stretch
+          options={[
+            { value: "pseudocode_es", label: tl("pseudocode_es"), icon: <TextAa size={16} weight="bold" aria-hidden /> },
+            { value: "python", label: tl("python"), icon: <TerminalWindow size={16} weight="bold" aria-hidden /> },
+          ]}
+        />
+        <p className="ml-auto hidden text-sm text-ink-muted lg:block">{t("tip1")}</p>
+      </div>
+
+      <CodeWorkspace
+        key={`${lang}-${version}`}
+        language={lang}
+        code={code}
+        onCodeChange={(c) => {
+          setCode(c);
+          saveDraft(lang, c);
+        }}
+        fill
+        allowFullscreen
+        headerExtra={headerExtra}
+        title={lang === "python" ? "laboratorio.py" : "laboratorio.pseudo"}
+        className="min-h-[420px] flex-1"
+      />
+
+      <AnimatePresence>
+        {saved && (
+          <motion.div
+            role="status"
+            initial={{ opacity: 0, y: 20, scale: 0.95 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: 12, scale: 0.97 }}
+            transition={{ type: "spring", stiffness: 420, damping: 30 }}
+            className="absolute inset-x-0 bottom-20 z-10 mx-auto flex w-fit items-center gap-3 rounded-full bg-white py-2 pl-3 pr-2 text-sm font-semibold text-ink shadow-[var(--shadow-lift)] ring-1 ring-mint-700/20"
+          >
+            <CheckCircle size={22} weight="fill" className="text-mint-700" aria-hidden /> {t("saved")}
+            <Link href={`/app/proyectos/${saved}`} className="inline-flex h-9 items-center gap-1 rounded-full bg-ink px-3.5 text-paper">
+              {t("open")} <ArrowRight size={14} weight="bold" aria-hidden />
+            </Link>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      <Sheet open={examples} onClose={() => setExamples(false)} title={t("examples")} closeLabel={t("close")}>
+        <p className="-mt-1 mb-4 text-sm text-ink-muted">{t("examplesBody", { lang: tl(lang) })}</p>
+        <Stagger as="ul" className="grid gap-3 sm:grid-cols-2">
+          {Object.entries(EXAMPLES[lang]).map(([k, src]) => {
+            const { Icon, tone } = EX_META[k];
+            return (
+              <StaggerItem as="li" key={k}>
+                <button
+                  type="button"
+                  onClick={() => {
+                    load(src);
+                    setExamples(false);
+                  }}
+                  className="group flex w-full flex-col overflow-hidden rounded-[1.25rem] bg-white text-left ring-1 ring-ink/[0.07] transition duration-300 hover:-translate-y-0.5 hover:shadow-[var(--shadow-tile)] active:scale-[0.98]"
+                >
+                  <span className={cx("relative h-24 overflow-hidden bg-gradient-to-br p-3", tone)} aria-hidden>
+                    <Icon size={26} weight="fill" className="absolute right-3 top-3 text-white/90" />
+                    <pre className="absolute -bottom-2 left-3 right-10 rounded-t-xl bg-midnight/90 px-3 pt-2 font-mono text-[0.62rem] leading-relaxed text-[#d9c2fa] transition-transform duration-500 group-hover:-translate-y-1">
+                      {src.split("\n").slice(0, 4).join("\n")}
+                    </pre>
+                  </span>
+                  <span className="flex items-center justify-between gap-2 p-3.5">
+                    <span>
+                      <span className="block font-bold">{t(`exampleNames.${k}` as "exampleNames.hola")}</span>
+                      <span className="block text-xs text-ink-muted">{t(`exampleDesc.${k}` as "exampleDesc.hola")}</span>
+                    </span>
+                    <ArrowRight size={18} weight="bold" className="shrink-0 text-violet-700 transition-transform group-hover:translate-x-1" aria-hidden />
+                  </span>
+                </button>
+              </StaggerItem>
+            );
+          })}
+        </Stagger>
+      </Sheet>
     </div>
   );
 }

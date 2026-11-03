@@ -20,14 +20,15 @@ export async function LogroCard({ item, size = "md" }: { item: Card; size?: "md"
   const Icon = KIND_ICON[item.kind];
   return (
     <article className={cx("tile group relative flex h-full flex-col overflow-hidden transition duration-300 hover:-translate-y-1 hover:shadow-[var(--shadow-lift)]", size === "lg" && "md:flex-row")}>
-      <div className={cx("relative overflow-hidden bg-gradient-to-br text-white", KIND_BG[item.kind], size === "lg" ? "min-h-80 md:min-h-full md:w-[55%]" : "h-36")}>
+      <div className={cx("relative overflow-hidden bg-gradient-to-br text-white", KIND_BG[item.kind], size === "lg" ? "min-h-72 md:min-h-full md:w-[55%]" : "h-36")}>
         <div className="dot-grid absolute inset-0 opacity-40 mix-blend-overlay" aria-hidden />
-        <div className="absolute -right-8 -bottom-10 size-40 rounded-full bg-white/18" aria-hidden />
-        <div className="absolute left-5 top-5 grid size-12 place-items-center rounded-2xl bg-white/20 backdrop-blur-sm">
+        <div className="absolute -bottom-10 -right-8 size-40 rounded-full bg-white/18 transition-transform duration-700 group-hover:scale-125" aria-hidden />
+        <div className="absolute left-5 top-5 grid size-12 place-items-center rounded-2xl bg-white/20 backdrop-blur-sm transition-transform duration-300 group-hover:-rotate-6 group-hover:scale-110">
           <Icon size={26} weight="bold" aria-hidden />
         </div>
         {size === "lg" && item.preview && item.language ? (
-          <div className="absolute inset-x-5 bottom-5 top-20 overflow-hidden rounded-2xl bg-midnight/95 py-3 [mask-image:linear-gradient(to_right,black_82%,transparent),linear-gradient(to_bottom,black_80%,transparent)] [mask-composite:intersect] shadow-[0_20px_40px_-20px_rgb(26_16_54/0.9)] ring-1 ring-white/10 md:inset-x-6">
+          <div className="absolute inset-x-5 top-20 max-h-[calc(100%-6.5rem)] overflow-hidden rounded-2xl bg-midnight/95 py-3 [mask-image:linear-gradient(to_right,black_85%,transparent)] shadow-[0_24px_50px_-20px_rgb(26_16_54/0.9)] ring-1 ring-white/10 transition-transform duration-500 group-hover:-translate-y-1 group-hover:-rotate-1 md:inset-x-6">
+            <div className="mb-2 flex gap-1.5 px-4" aria-hidden><span className="size-2 rounded-full bg-pink" /><span className="size-2 rounded-full bg-sun" /><span className="size-2 rounded-full bg-mint" /></div>
             <CodeSnippet code={item.preview} language={item.language} className="text-[0.72rem] md:text-[0.78rem]" />
           </div>
         ) : null}

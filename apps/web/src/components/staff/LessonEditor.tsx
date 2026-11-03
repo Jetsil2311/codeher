@@ -1,4 +1,5 @@
 "use client";
+import { Segmented } from "@/components/motion/Segmented";
 import { useEffect, useMemo, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
@@ -233,10 +234,8 @@ export function LessonEditor({ data, founder, pseudoConstructs }: { data: Data; 
 
       {msg ? <p role="status" className={cx("rounded-2xl px-4 py-3 text-sm font-semibold", msg.ok ? "bg-[#d9fbf5] text-mint-700" : "bg-pink-100 text-ink")}>{msg.text}</p> : null}
 
-      <div role="tablist" aria-label={t("sections")} className="flex gap-1 overflow-x-auto rounded-full bg-white p-1 ring-1 ring-line">
-        {tabs.map((x) => (
-          <button key={x.k} role="tab" aria-selected={tab === x.k} type="button" onClick={() => setTab(x.k)} className={cx("h-10 shrink-0 rounded-full px-4 text-sm font-semibold transition", tab === x.k ? "bg-ink text-paper" : "text-ink-soft hover:bg-violet-100")}>{x.label}</button>
-        ))}
+      <div className="-mx-4 overflow-x-auto px-4 [scrollbar-width:none] md:mx-0 md:px-0">
+        <Segmented label={t("sections")} value={tab} onChange={(v) => setTab(v as typeof tab)} options={tabs.map((x) => ({ value: x.k, label: x.label }))} />
       </div>
 
       {tab === "content" && (

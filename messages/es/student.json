@@ -15,7 +15,9 @@
     "hidePin": "Ocultar PIN",
     "entering": "Entrando…",
     "submit": "Entrar",
-    "noRecovery": "¿Olvidaste tu PIN? Pide ayuda a quien imparte tu grupo."
+    "noRecovery": "¿Olvidaste tu PIN? Pide ayuda a quien imparte tu grupo.",
+    "cardLabel": "Tarjeta de acceso",
+    "demoTap": "Toca una para llenar el código y el PIN."
   },
   "privacy": {
     "title": "Aviso de privacidad",
@@ -58,7 +60,13 @@
     "profile": "Mi perfil",
     "streakShort": "días",
     "signOut": "Salir",
-    "lab": "Laboratorio"
+    "lab": "Laboratorio",
+    "pathShort": "Ruta",
+    "labShort": "Lab",
+    "profileShort": "Perfil",
+    "xpToNext": "Te faltan {n} XP para el siguiente nivel",
+    "account": "Tu cuenta",
+    "close": "Cerrar"
   },
   "home": {
     "hello": "¡Hola, {name}!",
@@ -82,7 +90,18 @@
     "newProject": "Crear un proyecto",
     "badges": "Insignias",
     "earned": "Conseguida",
-    "pending": "Por conseguir"
+    "pending": "Por conseguir",
+    "morning": "Buenos días",
+    "afternoon": "Buenas tardes",
+    "evening": "Buenas noches",
+    "heroBody": "Tu siguiente reto te espera. Unos minutos hoy hacen una gran diferencia.",
+    "quickLab": "Laboratorio",
+    "quickLabBody": "Código libre",
+    "quickPath": "Mi ruta",
+    "toNext": "Te faltan {n} XP para subir de nivel",
+    "streakDots": "Días de racha esta semana",
+    "streakWeek": "¡Semana completa! Sigue así.",
+    "streakGoal": "{n, plural, one {Falta # día} other {Faltan # días}} para tu insignia de 7"
   },
   "badges": {
     "first_program": {
@@ -137,7 +156,15 @@
     "unlockAfter": "Se desbloquea al completar «{title}».",
     "review": "Repasar",
     "open": "Abrir",
-    "read": "Leer"
+    "read": "Leer",
+    "here": "Aquí vas",
+    "start": "Empezar",
+    "done": "Lista",
+    "stateLocked": "bloqueada",
+    "stateDone": "completada",
+    "stateCurrent": "siguiente",
+    "unitLabel": "Curso {n}",
+    "nodeLabel": "Lección {n}: {title}, {state}"
   },
   "projects": {
     "title": "Mis proyectos",
@@ -181,7 +208,12 @@
     "nominateName": "Título",
     "nominateBlurb": "Cuéntanos qué hace",
     "nominateBlurbHelp": "Una o dos frases. No escribas tu apellido ni datos personales.",
-    "send": "Enviar"
+    "send": "Enviar",
+    "newOpen": "Nuevo proyecto",
+    "newTitle": "Crea un proyecto",
+    "close": "Cerrar",
+    "pseudoBody": "Palabras en español. Ideal para empezar.",
+    "pythonBody": "El lenguaje que usan científicas y apps."
   },
   "profile": {
     "title": "Mi perfil",

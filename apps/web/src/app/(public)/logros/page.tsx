@@ -2,7 +2,10 @@ import Link from "next/link";
 import type { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
 import { LogroCard } from "@/components/site/LogroCard";
-import { SectionTitle, cx } from "@/components/ui";
+import { Suspense } from "react";
+import { SectionTitle } from "@/components/ui";
+import { LogrosFilters } from "@/components/site/LogrosFilters";
+import { Stagger, StaggerItem } from "@/components/motion/Motion";
 import { logros } from "@/server/services/public";
 
 export const dynamic = "force-dynamic";
@@ -28,34 +31,29 @@ export default async function Logros({ searchParams }: { searchParams: Promise<{
     const s = p.toString();
     return s ? `/logros?${s}` : "/logros";
   };
-  const Chip = ({ href, active, children }: { href: string; active: boolean; children: React.ReactNode }) => (
-    <Link href={href} aria-current={active ? "true" : undefined} className={cx("inline-flex h-10 shrink-0 snap-start items-center whitespace-nowrap rounded-full px-4 text-sm font-semibold ring-1 transition", active ? "bg-violet-700 text-white ring-violet-700" : "bg-paper text-ink-soft ring-ink/10 hover:ring-violet/50")}>
-      {children}
-    </Link>
-  );
   return (
-    <div className="mx-auto max-w-7xl px-4 pb-24 pt-10 md:px-6 md:pt-16">
-      <SectionTitle as="h1" accent={t("titleAccent")} className="text-4xl md:text-5xl">
+    <div className="mx-auto max-w-7xl px-4 pb-24 pt-8 md:px-6 md:pt-14">
+      <SectionTitle as="h1" accent={t("titleAccent")} className="text-4xl md:text-6xl">
         {t("title")}
       </SectionTitle>
       <p className="mt-3 max-w-[60ch] text-lg text-ink-soft">{t("subtitle")}</p>
 
-      <div role="search" aria-label={t("filters")} className="mt-8 grid gap-4 rounded-[1.5rem] bg-white p-4 ring-1 ring-ink/[0.06] md:grid-cols-3 md:p-5">
-        {[
-          { label: t("year"), key: "anio", all: !sp.anio, opts: years.map((y) => ({ v: String(y), l: String(y) })) },
-          { label: t("community"), key: "comunidad", all: !sp.comunidad, opts: communities.map((c) => ({ v: c, l: c })) },
-          { label: t("type"), key: "tipo", all: !sp.tipo, opts: KINDS.map((k) => ({ v: k, l: tk(k) })) },
-        ].map((f) => (
-          <div key={f.key} className="min-w-0">
-            <p className="mb-2 text-xs font-bold uppercase tracking-wide text-ink-muted">{f.label}</p>
-            <div className="-mx-1 flex snap-x gap-2 overflow-x-auto px-1 pb-1 [scrollbar-width:none]">
-              <Chip href={qs({ [f.key]: undefined })} active={f.all}>{t("all")}</Chip>
-              {f.opts.map((o) => (
-                <Chip key={o.v} href={qs({ [f.key]: o.v })} active={(sp as Record<string, string | undefined>)[f.key] === o.v}>{o.l}</Chip>
-              ))}
-            </div>
-          </div>
-        ))}
+      <div className="mt-8">
+        <Suspense>
+          <LogrosFilters
+            labels={{ filters: t("filters"), clear: t("clear"), close: t("close"), show: t("results", { n: items.length }) }}
+            active={[
+              sp.anio ? { label: sp.anio, href: qs({ anio: undefined }) } : null,
+              sp.comunidad ? { label: sp.comunidad, href: qs({ comunidad: undefined }) } : null,
+              sp.tipo ? { label: tk(sp.tipo as "project"), href: qs({ tipo: undefined }) } : null,
+            ].filter((x): x is { label: string; href: string } => !!x)}
+            groups={[
+              { key: "anio", label: t("year"), items: [{ href: qs({ anio: undefined }), label: t("all"), active: !sp.anio }, ...years.map((y) => ({ href: qs({ anio: String(y) }), label: String(y), active: sp.anio === String(y) }))] },
+              { key: "comunidad", label: t("community"), items: [{ href: qs({ comunidad: undefined }), label: t("all"), active: !sp.comunidad }, ...communities.map((c) => ({ href: qs({ comunidad: c }), label: c, active: sp.comunidad === c }))] },
+              { key: "tipo", label: t("type"), items: [{ href: qs({ tipo: undefined }), label: t("all"), active: !sp.tipo }, ...KINDS.map((k) => ({ href: qs({ tipo: k }), label: tk(k), active: sp.tipo === k }))] },
+            ]}
+          />
+        </Suspense>
       </div>
       {items.length > 0 ? <p className="mt-4 text-sm font-semibold text-ink-muted" aria-live="polite">{t("results", { n: items.length })}</p> : null}
 
@@ -72,13 +70,13 @@ export default async function Logros({ searchParams }: { searchParams: Promise<{
               <LogroCard item={featured} size="lg" />
             </section>
           )}
-          <ul className="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+          <Stagger as="ul" inView className="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
             {rest.map((a) => (
-              <li key={a.id}>
+              <StaggerItem as="li" key={a.id}>
                 <LogroCard item={a} />
-              </li>
+              </StaggerItem>
             ))}
-          </ul>
+          </Stagger>
         </>
       )}
     </div>

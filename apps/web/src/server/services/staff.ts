@@ -239,7 +239,8 @@ export function listGroups(p: Profile) {
 
 export function dashboard(p: Profile) {
   return read((db) => {
-    const mine = db.groups.filter((g) => db.educator_groups.some((eg) => eg.group_id === g.id && eg.educator_id === p.id));
+    // Founders see every group (tech spec 4.2); educators only their assignments.
+    const mine = db.groups.filter((g) => canSeeGroup(db, p, g.id));
     const mineIds = new Set(mine.map((g) => g.id));
     const students = db.students.filter((s) => mineIds.has(s.group_id));
     const sid = new Set(students.map((s) => s.id));

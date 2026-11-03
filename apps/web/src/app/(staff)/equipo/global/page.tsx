@@ -1,3 +1,4 @@
+import { BookOpen, FolderSimple, Student, UsersThree } from "@phosphor-icons/react/dist/ssr";
 import Link from "next/link";
 import { getTranslations } from "next-intl/server";
 import { PageHead, Panel, Stat, TableWrap, monthName, td, th } from "@/components/staff/StaffUi";
@@ -22,11 +23,11 @@ export default async function Global({ searchParams }: { searchParams: Promise<{
   return (
     <>
       <PageHead title={t("title")} subtitle={t("subtitle")} />
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <Stat label={t("students")} value={s.students} hint={t("activeWeek", { n: s.active_week })} tone="ink" />
-        <Stat label={t("groups")} value={s.groups} hint={t("activeGroups", { n: s.active_groups })} />
-        <Stat label={t("lessonsCompleted")} value={s.lessons_completed} hint={`${tl("pseudocode_es")}: ${s.by_language.pseudocode_es ?? 0} · Python: ${s.by_language.python ?? 0}`} />
-        <Stat label={t("projects")} value={s.projects} hint={t("logros", { published: s.logros_published, pending: s.nominations_pending })} tone="violet" />
+      <div className="grid grid-cols-2 gap-3 md:gap-4 lg:grid-cols-4">
+        <Stat label={t("students")} value={s.students} icon={<Student size={19} weight="fill" aria-hidden />} hint={t("activeWeek", { n: s.active_week })} tone="ink" />
+        <Stat label={t("groups")} value={s.groups} icon={<UsersThree size={19} weight="fill" aria-hidden />} hint={t("activeGroups", { n: s.active_groups })} />
+        <Stat label={t("lessonsCompleted")} value={s.lessons_completed} icon={<BookOpen size={19} weight="fill" aria-hidden />} hint={`${tl("pseudocode_es")}: ${s.by_language.pseudocode_es ?? 0} · Python: ${s.by_language.python ?? 0}`} />
+        <Stat label={t("projects")} value={s.projects} icon={<FolderSimple size={19} weight="fill" aria-hidden />} hint={t("logros", { published: s.logros_published, pending: s.nominations_pending })} tone="violet" />
       </div>
       <Panel title={t("byCommunity")} className="mt-6">
         <ul className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">

@@ -1,14 +1,15 @@
 "use client";
+import { Segmented } from "@/components/motion/Segmented";
 // Client widgets for the staff workspace: Logros queue, error catalog editor, API keys,
 // educators management, settings, search.
 import Link from "next/link";
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
-import { CheckCircle, Copy, Key, MagnifyingGlass, Plus, Star, Warning } from "@phosphor-icons/react/dist/ssr";
+import { CheckCircle, Copy, Key, MagnifyingGlass, Plus, Star, Trophy, Warning } from "@phosphor-icons/react/dist/ssr";
 import { testPattern, type ErrorTranslationRow } from "@codeher/core";
 import { assignGroupAction, createApiKeyAction, inviteAction, reassignGroupsAction, reviewLogroAction, revokeApiKeyAction, saveErrorRowAction, searchAction, setStaffAction, updateSettingsAction, upsertCommunityAction } from "@/app/actions/staff";
-import { Field, LanguageBadge, Tag, inputClass, selectClass, textareaClass, cx } from "@/components/ui";
+import { EmptyState, Field, LanguageBadge, Tag, inputClass, selectClass, textareaClass, cx } from "@/components/ui";
 import type { Accomplishment, Community, ErrorTranslation, Settings } from "@/server/db/types";
 
 function useRun() {
@@ -40,12 +41,15 @@ export function LogrosQueue({ items, founder }: { items: LogroRow[]; founder: bo
   return (
     <div className="space-y-4" aria-busy={pending}>
       <Msg />
-      <div role="tablist" className="flex flex-wrap gap-1">
-        {["pending", "published", "unpublished", "rejected", "all"].map((f) => (
-          <button key={f} role="tab" aria-selected={filter === f} type="button" onClick={() => setFilter(f)} className={cx("h-9 rounded-full px-4 text-sm font-semibold", filter === f ? "bg-ink text-paper" : "bg-white ring-1 ring-line")}>{t(`filter.${f}` as "filter.all")}</button>
-        ))}
+      <div className="-mx-4 overflow-x-auto px-4 [scrollbar-width:none] md:mx-0 md:px-0">
+        <Segmented
+          label={t("filter.all")}
+          value={filter}
+          onChange={setFilter}
+          options={["pending", "published", "unpublished", "rejected", "all"].map((f) => ({ value: f, label: t(`filter.${f}` as "filter.all"), count: f === "pending" ? items.filter((a) => a.status === "nominated" || a.status === "approved").length : f === "all" ? items.length : items.filter((a) => a.status === f).length }))}
+        />
       </div>
-      {shown.length === 0 ? <p className="text-ink-muted">{t("empty")}</p> : (
+      {shown.length === 0 ? <EmptyState title={t("empty")} body={t("emptyBody")} icon={<Trophy size={28} weight="duotone" aria-hidden />} /> : (
         <ul className="grid gap-4 md:grid-cols-2">
           {shown.map((a) => (
             <li key={a.id} className="tile flex flex-col gap-3 p-5">

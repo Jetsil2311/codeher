@@ -5,10 +5,11 @@ import { CodeSnippet } from "@/components/code/CodeSnippet";
 import { BringForm, TeaserEditor } from "@/components/site/LandingClient";
 import { LogroCard } from "@/components/site/LogroCard";
 import { Reveal } from "@/components/site/Reveal";
+import { CodeMarquee, DrawLine, Faq } from "@/components/site/LandingMotion";
+import { CountUp } from "@/components/motion/Motion";
 import { ButtonLink, CodeGlyphs, SectionTitle } from "@/components/ui";
 import { landing } from "@/server/services/public";
 import { SITE_URL } from "@/lib/site";
-import { CaretDown } from "@phosphor-icons/react/dist/ssr";
 
 export const dynamic = "force-dynamic";
 
@@ -76,8 +77,8 @@ export default async function Landing() {
           </div>
 
           <div className="relative mx-auto w-full max-w-lg lg:max-w-none" aria-hidden>
-            <div className="absolute -right-10 -top-16 size-72 rounded-full bg-violet md:size-96" />
-            <div className="absolute -bottom-14 -left-8 size-56 rounded-full bg-pink md:size-72" />
+            <div className="absolute -right-10 -top-16 size-72 rounded-full bg-violet motion-safe:animate-float md:size-96" style={{ animationDuration: "9s" }} />
+            <div className="absolute -bottom-14 -left-8 size-56 rounded-full bg-pink motion-safe:animate-float md:size-72" style={{ animationDuration: "11s", animationDelay: "1s" }} />
             <div className="absolute left-[18%] top-[10%] size-20 rounded-full border-[10px] border-sun/80" />
             <div className="relative rotate-[-2deg] rounded-[1.75rem] bg-midnight p-2 shadow-[0_40px_80px_-30px_rgb(26_16_54/0.8)] ring-1 ring-white/10 motion-safe:transition motion-safe:duration-500 hover:rotate-0">
               <div className="flex items-center gap-2 px-3 py-2.5">
@@ -86,11 +87,11 @@ export default async function Landing() {
                 <span className="size-3 rounded-full bg-mint" />
                 <span className="ml-3 font-mono text-xs text-[#b8acd6]">mi_futuro.pseudo</span>
               </div>
-              <div className="rounded-[1.3rem] bg-[#140c2e] py-4">
+              <div className="code-reveal rounded-[1.3rem] bg-[#140c2e] py-4">
                 <CodeSnippet code={HERO_CODE} language="pseudocode_es" highlightLine={5} />
               </div>
               <div className="m-2 mt-3 rounded-2xl bg-white/6 px-4 py-3 font-mono text-sm text-mint">
-                <span className="text-[#b8acd6]">salida ›</span> Yo puedo crear tecnología
+                <span className="text-[#b8acd6]">salida ›</span> <span className="type-out caret inline-block">Yo puedo crear tecnología</span>
               </div>
             </div>
             <div className="absolute -left-4 top-1/3 hidden rotate-[-6deg] rounded-2xl bg-white sm:block px-4 py-3 shadow-[var(--shadow-lift)] motion-safe:animate-float md:-left-10" style={{ ["--r" as string]: "-6deg" }}>
@@ -104,6 +105,8 @@ export default async function Landing() {
           </div>
         </div>
       </section>
+
+      <CodeMarquee items={["Escribir \"¡Hola!\"", "print(\"Hola\")", "Si … Entonces", "for i in range(5)", "Mientras … Hacer", "nombre <- \"Xóchitl\"", "input()", "Para i <- 1 Hasta 10", "def saluda():", "Leer edad", "if edad >= 12:", "FinProceso"]} />
 
       {/* ---------- Why CODEHER ---------- */}
       <section aria-labelledby="por-que" className="mx-auto max-w-7xl px-4 py-20 md:px-6 md:py-28">
@@ -134,13 +137,14 @@ export default async function Landing() {
             <p className="mt-3 max-w-[60ch] text-lg text-ink-soft">{t("how.subtitle")}</p>
           </Reveal>
           <ol className="relative mt-14 grid gap-6 lg:grid-cols-5 lg:gap-4">
-            <span className="absolute left-7 top-2 h-[calc(100%-1rem)] w-0.5 bg-grad lg:hidden" aria-hidden />
-            <span className="absolute left-0 right-0 top-7 hidden h-0.5 bg-grad lg:block" aria-hidden />
+            <DrawLine vertical className="absolute left-7 top-2 h-[calc(100%-1rem)] w-0.5 lg:hidden" />
+            <DrawLine className="absolute left-0 right-0 top-7 hidden h-0.5 lg:block" />
             {phases.map(({ key, Icon }, i) => (
               <li key={key} className="relative">
-                <Reveal delay={i * 0.06} className="flex gap-4 lg:flex-col">
-                  <span className="relative z-10 grid size-14 shrink-0 place-items-center rounded-2xl bg-ink text-paper shadow-[var(--shadow-tile)] ring-4 ring-white">
+                <Reveal delay={0.2 + i * 0.12} className="group flex gap-4 lg:flex-col">
+                  <span className="relative z-10 grid size-14 shrink-0 place-items-center rounded-2xl bg-ink text-paper shadow-[var(--shadow-tile)] ring-4 ring-white transition duration-300 group-hover:-translate-y-1 group-hover:rotate-[-6deg] group-hover:bg-grad">
                     <Icon size={26} weight="bold" aria-hidden />
+                    <span className="absolute -right-2 -top-2 grid size-6 place-items-center rounded-full bg-pink font-mono text-[0.7rem] font-bold text-ink ring-2 ring-white">{i + 1}</span>
                   </span>
                   <div className="lg:pr-2">
                     <h3 className="text-lg font-bold text-ink">{t(`how.phases.${key}.title`)}</h3>
@@ -218,7 +222,7 @@ export default async function Landing() {
                 {(["communities", "groups", "students"] as const).map((k) => (
                   <div key={k} className="rounded-2xl bg-white p-4 text-center ring-1 ring-violet/15">
                     <dt className="text-xs font-semibold text-ink-muted">{t(`where.totals.${k}`)}</dt>
-                    <dd className="mt-1 font-mono text-3xl font-bold tabular-nums text-ink">{data.totals[k]}</dd>
+                    <dd className="mt-1 font-mono text-3xl font-bold tabular-nums text-ink"><CountUp value={data.totals[k]} /></dd>
                   </div>
                 ))}
               </dl>
@@ -226,8 +230,8 @@ export default async function Landing() {
             <div className="relative grid gap-5 sm:grid-cols-2">
               {data.communities.map((c, i) => (
                 <Reveal key={c.name} delay={i * 0.08} className={i % 2 === 1 ? "sm:translate-y-10" : ""}>
-                  <article className="tile relative overflow-hidden p-6">
-                    <div className={`absolute -right-10 -top-10 size-36 rounded-full ${i % 2 ? "bg-pink/25" : "bg-violet/25"}`} aria-hidden />
+                  <article className="group tile relative overflow-hidden p-6 transition duration-300 hover:-translate-y-1 hover:shadow-[var(--shadow-lift)]">
+                    <div className={`absolute -right-10 -top-10 size-36 rounded-full transition-transform duration-700 group-hover:scale-150 ${i % 2 ? "bg-pink/25" : "bg-violet/25"}`} aria-hidden />
                     <MapPin size={28} weight="fill" className={i % 2 ? "text-pink-700" : "text-violet-700"} aria-hidden />
                     <h3 className="mt-3 text-2xl font-extrabold">{c.name}</h3>
                     <p className="text-sm text-ink-muted">{c.state}</p>
@@ -237,11 +241,11 @@ export default async function Landing() {
                     <dl className="mt-5 flex gap-6">
                       <div>
                         <dt className="text-xs font-semibold text-ink-muted">{t("where.groups")}</dt>
-                        <dd className="font-mono text-2xl font-bold tabular-nums">{c.groups}</dd>
+                        <dd className="font-mono text-2xl font-bold tabular-nums"><CountUp value={c.groups} /></dd>
                       </div>
                       <div>
                         <dt className="text-xs font-semibold text-ink-muted">{t("where.students")}</dt>
-                        <dd className="font-mono text-2xl font-bold tabular-nums">{c.students}</dd>
+                        <dd className="font-mono text-2xl font-bold tabular-nums"><CountUp value={c.students} /></dd>
                       </div>
                     </dl>
                   </article>
@@ -276,8 +280,8 @@ export default async function Landing() {
                 const Icon = k === "founders" ? HandHeart : k === "educators" ? ChalkboardTeacher : Users;
                 return (
                   <Reveal key={k} delay={i * 0.06}>
-                    <article className={`h-full rounded-[var(--radius-tile)] p-6 ${i === 0 ? "bg-ink text-paper" : "tile"}`}>
-                      <Icon size={32} weight="bold" className={i === 0 ? "text-pink" : "text-violet-700"} aria-hidden />
+                    <article className={`group h-full rounded-[var(--radius-tile)] p-6 transition duration-300 hover:-translate-y-1 ${i === 0 ? "bg-ink text-paper shadow-[var(--shadow-lift)]" : "tile hover:shadow-[var(--shadow-lift)]"}`}>
+                      <span className={`grid size-14 place-items-center rounded-2xl transition-transform duration-300 group-hover:rotate-[-8deg] group-hover:scale-110 ${i === 0 ? "bg-white/10 text-pink" : "bg-violet-100 text-violet-700"}`}><Icon size={28} weight="duotone" aria-hidden /></span>
                       <h3 className="mt-4 text-xl font-bold">{t(`team.roles.${k}.title`)}</h3>
                       <p className={`mt-2 ${i === 0 ? "text-[#d6cdea]" : "text-ink-soft"}`}>{t(`team.roles.${k}.body`)}</p>
                     </article>
@@ -294,16 +298,8 @@ export default async function Landing() {
             <span id="faq-t">{t("faq.title")}</span>
           </SectionTitle>
         </Reveal>
-        <div className="mt-8 space-y-3">
-          {faq.map((f, i) => (
-            <details key={i} className="group tile overflow-hidden" open={i === 0}>
-              <summary className="flex cursor-pointer list-none items-center justify-between gap-4 px-5 py-4 text-lg font-bold text-ink md:px-6 [&::-webkit-details-marker]:hidden">
-                {f.q}
-                <CaretDown size={20} weight="bold" className="shrink-0 text-violet-700 transition group-open:rotate-180" aria-hidden />
-              </summary>
-              <p className="px-5 pb-5 text-ink-soft md:px-6">{f.a}</p>
-            </details>
-          ))}
+        <div className="mt-8">
+          <Faq items={faq} />
         </div>
       </section>
 

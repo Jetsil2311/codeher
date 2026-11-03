@@ -117,7 +117,8 @@
     "visitorDone": "Terminaste esta lección. Imagina lo que harás con tu grupo.",
     "studentDone": "Terminaste esta lección. Sigue con la próxima.",
     "nextLesson": "Siguiente: {title}",
-    "moreLessons": "Más lecciones"
+    "moreLessons": "Más lecciones",
+    "progressPill": "{done} de {total} ejercicios"
   },
   "slides": {
     "dialog": "Diapositivas: {title}",
