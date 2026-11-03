@@ -1,0 +1,35 @@
+{
+  "meta": {
+    "title": "CODEHER · Programar es para ti",
+    "description": "Programa social que enseña programación con Python y pseudocódigo en español a chicas y adolescentes de Tequixquiac y Apaxco, Estado de México."
+  },
+  "skip": "Saltar al contenido",
+  "nav": {
+    "main": "Navegación principal",
+    "probar": "Probar",
+    "logros": "Logros",
+    "how": "Cómo funciona",
+    "bring": "Llévalo a tu comunidad",
+    "entrar": "Entrar",
+    "menu": "Abrir menú",
+    "close": "Cerrar menú"
+  },
+  "footer": {
+    "tagline": "Programación para chicas y adolescentes del Estado de México. Aprende, crea y presenta tus proyectos en tu comunidad.",
+    "explore": "Explora",
+    "probar": "Probar una lección",
+    "logros": "Logros",
+    "entrar": "Entrar con mi código",
+    "bring": "Lleva CODEHER a tu comunidad",
+    "about": "CODEHER",
+    "privacy": "Aviso de privacidad",
+    "rights": "© {year} CODEHER. Hecho con cuidado en el Estado de México.",
+    "staff": "Acceso para el equipo"
+  },
+  "localMode": {
+    "title": "Modo local",
+    "body": "Estás usando datos de prueba guardados en esta computadora."
+  },
+  "never": "Nunca",
+  "back": "Volver"
+}

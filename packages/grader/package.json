@@ -1,0 +1,27 @@
+{
+  "name": "@codeher/grader",
+  "version": "1.1.0",
+  "private": true,
+  "type": "module",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "exports": {
+    ".": "./src/index.ts",
+    "./pseudo": "./src/pseudo/index.ts",
+    "./python": "./src/python/index.ts",
+    "./pseudo/worker": "./src/pseudo/worker-handler.ts",
+    "./python/local": "./src/python/local-runner.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc -p tsconfig.json",
+    "test": "vitest run",
+    "lint": "tsc -p tsconfig.json"
+  },
+  "dependencies": {
+    "@codeher/core": "workspace:*"
+  },
+  "devDependencies": {
+    "typescript": "5.9.3",
+    "vitest": "^5.1.0"
+  }
+}

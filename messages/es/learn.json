@@ -1,0 +1,124 @@
+{
+  "language": { "python": "Python", "pseudocode_es": "Pseudocódigo" },
+  "editor": {
+    "placeholder": "Escribe tu código aquí…",
+    "helper": "Teclas de ayuda para pseudocódigo",
+    "label": "Editor de código",
+    "labelFor": "Editor de código para {title}"
+  },
+  "actions": {
+    "run": "Ejecutar",
+    "stop": "Detener",
+    "step": "Paso a paso",
+    "format": "Dar formato",
+    "check": "Comprobar",
+    "checking": "Revisando…"
+  },
+  "console": {
+    "title": "Salida",
+    "running": "ejecutando…",
+    "empty": "Aquí aparecerá lo que escriba tu programa.",
+    "inputLabel": "Valor para {name}",
+    "inputPlaceholder": "Escribe un valor para {name}",
+    "send": "Enviar",
+    "inputsTitle": "Entradas (una por línea)",
+    "inputsPlaceholder": "Escribe aquí los datos que leerá input(), uno por línea"
+  },
+  "step": {
+    "variables": "Variables",
+    "line": "Línea {line}",
+    "noVariables": "Todavía no hay variables.",
+    "name": "Nombre",
+    "type": "Tipo",
+    "value": "Valor",
+    "controls": "Controles de Paso a paso",
+    "pause": "Pausa",
+    "play": "Reproducir",
+    "next": "Siguiente paso",
+    "restart": "Reiniciar",
+    "speed": "Velocidad",
+    "speedValue": "{n} pasos por segundo",
+    "finalVariables": "Ver el valor final de las variables"
+  },
+  "python": {
+    "preparing": "Preparando Python…",
+    "preparingHint": "Solo tarda la primera vez: tu navegador descarga Python (varios megas).",
+    "crashed": "No se pudo cargar Python. Revisa tu conexión e inténtalo de nuevo."
+  },
+  "errors": {
+    "fallbackTitle": "Algo no salió como esperabas cerca de la línea {line}.",
+    "fallbackExplanation": "Tu programa se detuvo antes de terminar.",
+    "fallbackSuggestion": "Revisa esa línea con calma. Si no ves el problema, pide una pista.",
+    "where": "Línea {line}",
+    "howToFix": "Cómo arreglarlo:",
+    "showOriginal": "Ver el mensaje original de Python",
+    "hideOriginal": "Ocultar el mensaje original"
+  },
+  "exercise": { "number": "Ejercicio {n}", "done": "Completado", "answer": "Tu respuesta" },
+  "feedback": {
+    "right": "¡Correcto!",
+    "notYet": "Todavía no. Estás cerca, revisa la pista.",
+    "lessonDone": "¡Lección completada!",
+    "passed": "¡Lo lograste!",
+    "xp": "+{xp} XP"
+  },
+  "serverErrors": {
+    "lesson_locked": "Esta lección todavía está bloqueada. Completa la anterior para guardar tu avance.",
+    "rate_limited": "Vas muy rápido. Espera un momento y vuelve a intentar.",
+    "not_authenticated": "Tu sesión terminó. Vuelve a entrar con tu código.",
+    "exercise_not_found": "No encontramos este ejercicio.",
+    "unexpected": "No pudimos guardar tu avance. Inténtalo de nuevo."
+  },
+  "hints": { "show": "Ver pista ({n} de {total})" },
+  "tests": {
+    "allPassed": "¡Todas las pruebas pasaron!",
+    "notYet": "Todavía no. Revisa las pruebas marcadas.",
+    "passed": "Pasó",
+    "skipped": "No se revisó",
+    "notYetShort": "Todavía no",
+    "hidden": "Prueba oculta",
+    "skippedHint": "Arregla el error de arriba para revisar esta prueba.",
+    "expected": "Se esperaba",
+    "actual": "Tu programa escribió",
+    "nothing": "(nada)"
+  },
+  "lesson": {
+    "breadcrumb": "Ubicación",
+    "backToLibrary": "Todas las lecciones",
+    "backToPath": "Mi ruta",
+    "visitorBanner": "Estás probando CODEHER. Entra con tu código para guardar tus proyectos.",
+    "visitorBannerCta": "Entrar con mi código",
+    "minutes": "{n} min",
+    "xp": "{n} XP",
+    "completed": "Completada",
+    "twinPython": "Verla en Python",
+    "twinPseudo": "Verla en pseudocódigo",
+    "slides": "Ver diapositivas",
+    "locked": "Esta lección todavía está bloqueada. Puedes leerla, pero tu avance se guardará cuando la desbloquees.",
+    "lockedAfter": "Se desbloquea al completar «{title}». Puedes leerla mientras tanto.",
+    "content": "Contenido de la lección",
+    "exercises": "Ejercicios",
+    "visitorNoSave": "Entra con tu código para guardar proyectos.",
+    "saveProject": "Guardar proyecto",
+    "saving": "Guardando…",
+    "projectSaved": "¡Proyecto guardado!",
+    "openProject": "Abrir proyecto",
+    "markDone": "Marcar como completada",
+    "wellDone": "¡Muy bien!",
+    "visitorDone": "Terminaste esta lección. Imagina lo que harás con tu grupo.",
+    "studentDone": "Terminaste esta lección. Sigue con la próxima.",
+    "nextLesson": "Siguiente: {title}",
+    "moreLessons": "Más lecciones"
+  },
+  "slides": {
+    "dialog": "Diapositivas: {title}",
+    "notes": "Notas",
+    "noNotes": "Esta diapositiva no tiene notas.",
+    "fullscreen": "Pantalla completa",
+    "print": "Imprimir o PDF",
+    "close": "Cerrar diapositivas",
+    "counter": "{n} de {total}",
+    "prev": "Anterior",
+    "next": "Siguiente"
+  }
+}

@@ -1,0 +1,119 @@
+{
+  "hero": {
+    "eyebrow": "Tequixquiac y Apaxco, Estado de México",
+    "titleA": "Programar es",
+    "titleAccent": "para ti",
+    "subtitle": "Aprende Python y lógica en español, crea tus propios proyectos y preséntalos en tu comunidad.",
+    "ctaEnter": "Entrar",
+    "ctaTry": "Probar una lección",
+    "badge": "¡Lo lograste!"
+  },
+  "why": {
+    "title": "La tecnología también",
+    "titleAccent": "es tuya.",
+    "p1": "En México muy pocas mujeres estudian o trabajan en tecnología. No es falta de talento: casi siempre es falta de una primera oportunidad cerca de casa.",
+    "p2": "CODEHER lleva talleres de programación a comunidades semirrurales para que chicas de 12 a 18 años escriban su primer programa, construyan proyectos y se vean a sí mismas como creadoras.",
+    "p3": "Aquí nadie falla: todavía no, y luego sí."
+  },
+  "how": {
+    "title": "Cinco fases,",
+    "titleAccent": "un proyecto tuyo",
+    "subtitle": "Aprendemos haciendo. Cada grupo recorre el mismo camino, de la primera curiosidad a presentar algo propio.",
+    "phases": {
+      "induction": { "title": "Inducción y motivación", "body": "Conocemos a mujeres que crean tecnología y descubrimos qué te gustaría construir." },
+      "training": { "title": "Capacitación técnica", "body": "Lógica en pseudocódigo y Python, con lecciones cortas y ejercicios que se revisan solos." },
+      "projects": { "title": "Creación de proyectos", "body": "Tomas una idea de tu vida diaria y la conviertes en un programa que funciona." },
+      "presentation": { "title": "Presentación comunitaria", "body": "Muestras tu proyecto a tu familia, tu escuela y tu comunidad." },
+      "evaluation": { "title": "Evaluación y retroalimentación", "body": "Revisamos juntas lo aprendido y celebramos cada avance." }
+    }
+  },
+  "teaser": {
+    "title": "Pruébalo",
+    "titleAccent": "aquí mismo",
+    "body": "Este es el mismo editor que usan las estudiantes. Cambia el código y presiona Ejecutar.",
+    "b1": "Pseudocódigo con palabras en español: Si, Mientras, Escribir.",
+    "b2": "Paso a paso para ver cómo cambia cada variable.",
+    "b3": "Errores explicados en español, sin regaños.",
+    "cta": "Ver todas las lecciones",
+    "tabs": "Lenguaje del ejemplo"
+  },
+  "logros": {
+    "title": "Lo que ya están",
+    "titleAccent": "creando",
+    "all": "Ver todos los logros",
+    "empty": "Muy pronto verás aquí los primeros proyectos.",
+    "sample": "Ejemplo",
+    "view": "Ver proyecto",
+    "tags": "Etiquetas",
+    "kind": {
+      "project": "Proyecto",
+      "first_program": "Primer programa",
+      "first_website": "Primer sitio web",
+      "community_presentation": "Presentación comunitaria",
+      "milestone": "Logro"
+    }
+  },
+  "where": {
+    "title": "Dónde ha estado",
+    "titleAccent": "CODEHER",
+    "body": "Empezamos en Tequixquiac y llegamos a Apaxco. Los números se actualizan solos con cada grupo nuevo.",
+    "totals": { "communities": "Comunidades", "groups": "Grupos", "students": "Estudiantes" },
+    "groups": "Grupos",
+    "students": "Estudiantes",
+    "since": "Desde {year}",
+    "years": "Grupos en {years}",
+    "starting": "Primeros grupos en camino"
+  },
+  "team": {
+    "title": "Las personas",
+    "titleAccent": "detrás",
+    "body": "Un equipo de mujeres en tecnología, docentes y aliadas de la comunidad.",
+    "roles": {
+      "founders": { "title": "Fundadoras", "body": "Diseñan el programa, cuidan cada grupo y abren puertas en escuelas y comunidades." },
+      "educators": { "title": "Educadoras", "body": "Acompañan cada sesión, resuelven dudas y celebran los avances de su grupo." },
+      "allies": { "title": "Aliadas", "body": "Escuelas, familias y organizaciones que prestan espacios, equipo y su tiempo." }
+    }
+  },
+  "bring": {
+    "title": "Lleva CODEHER a tu comunidad",
+    "body": "¿Eres docente, diriges una escuela o coordinas un espacio comunitario? Escríbenos y armamos un grupo juntas.",
+    "name": "Tu nombre",
+    "community": "Escuela o comunidad",
+    "communityHelp": "Por ejemplo: Secundaria Técnica de Apaxco",
+    "email": "Correo electrónico",
+    "message": "Cuéntanos un poco",
+    "send": "Enviar mensaje",
+    "sending": "Enviando…",
+    "thanks": "¡Gracias por escribirnos!",
+    "thanksBody": "Te responderemos pronto por correo."
+  },
+  "logrosPage": {
+    "title": "Logros",
+    "titleAccent": "de nuestras estudiantes",
+    "subtitle": "Proyectos terminados y primeros pasos que nos llenan de orgullo. Solo aparecen con permiso de su familia.",
+    "featured": "Logro destacado",
+    "filters": "Filtrar logros",
+    "year": "Año",
+    "community": "Comunidad",
+    "type": "Tipo",
+    "all": "Todos",
+    "results": "{n, plural, =0 {Sin resultados} one {# logro} other {# logros}}",
+    "empty": "No hay logros con estos filtros.",
+    "clear": "Quitar filtros",
+    "readOnly": "Puedes ejecutar este proyecto. Los cambios no se guardan.",
+    "back": "Volver a Logros",
+    "noCode": "Este logro no incluye código."
+  },
+  "probarPage": {
+    "title": "Prueba",
+    "titleAccent": "una lección",
+    "subtitle": "Sin registrarte. Lee, escribe código y ejecútalo en tu navegador.",
+    "filter": "Lenguaje",
+    "all": "Todas",
+    "minutes": "{n} min",
+    "exercises": "{n, plural, one {# ejercicio} other {# ejercicios}}",
+    "start": "Empezar",
+    "empty": "No hay lecciones en este lenguaje todavía.",
+    "banner": "Estás probando CODEHER. Entra con tu código para guardar tus proyectos."
+  }
+}

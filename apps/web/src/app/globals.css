@@ -1,0 +1,179 @@
+@import "tailwindcss";
+
+/* CODEHER design tokens (design brief section 2). Brand Violet/Pink are for large
+   text and graphics; small colored text uses the 700 shades (accessibility table). */
+@theme {
+  --color-violet: #9b5de5;
+  --color-violet-700: #8d55d0;
+  --color-violet-800: #6f3fb0;
+  --color-violet-300: #9e62e6;
+  --color-violet-100: #f3ecfc;
+  --color-violet-50: #f9f5fe;
+  --color-pink: #f15bb5;
+  --color-pink-700: #ba468b;
+  --color-pink-100: #fdebf6;
+  --color-paper: #f7f7f7;
+  --color-ink: #1b1030;
+  --color-ink-soft: #4a4060;
+  --color-ink-muted: #625a75;
+  --color-line: #e6e1ee;
+  --color-midnight: #1a1036;
+  --color-midnight-2: #231848;
+  --color-midnight-3: #2e2258;
+  --color-sun: #fee440;
+  --color-sky: #00bbf9;
+  --color-mint: #00f5d4;
+  --color-mint-700: #00796b;
+  --color-sun-700: #8a6d00;
+  --color-danger: #c0264f;
+
+  --font-sans: var(--font-montserrat), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-jetbrains), ui-monospace, "SFMono-Regular", monospace;
+  --font-accent: var(--font-fraunces), Georgia, serif;
+
+  --radius-tile: 1.5rem;
+  --radius-card: 1.25rem;
+
+  --shadow-tile: 0 1px 0 rgb(27 16 48 / 0.04), 0 10px 30px -12px rgb(91 49 160 / 0.22), 0 2px 6px -2px rgb(27 16 48 / 0.08);
+  --shadow-lift: 0 1px 0 rgb(27 16 48 / 0.04), 0 22px 44px -18px rgb(91 49 160 / 0.35), 0 4px 10px -4px rgb(27 16 48 / 0.1);
+  --shadow-pop: 0 18px 50px -20px rgb(241 91 181 / 0.55);
+
+  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --ease-out-soft: cubic-bezier(0.16, 1, 0.3, 1);
+
+  --animate-float: float 7s ease-in-out infinite;
+  --animate-rise: rise 0.5s var(--ease-out-soft) both;
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0) rotate(var(--r, 0deg)); }
+  50% { transform: translateY(-10px) rotate(var(--r, 0deg)); }
+}
+@keyframes rise {
+  from { opacity: 0; transform: translateY(14px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes shimmer {
+  from { background-position: -200% 0; }
+  to { background-position: 200% 0; }
+}
+@keyframes blink { 50% { opacity: 0; } }
+
+:root {
+  --grad: linear-gradient(90deg, var(--color-violet) 0%, var(--color-pink) 100%);
+  --surface: #ffffff;
+  color-scheme: light;
+}
+
+html { -webkit-text-size-adjust: 100%; }
+body {
+  background: var(--color-paper);
+  color: var(--color-ink);
+  font-family: var(--font-sans);
+  font-size: 1rem;
+  line-height: 1.6;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+}
+
+::selection { background: var(--color-pink-100); color: var(--color-ink); }
+
+:focus-visible {
+  outline: 3px solid var(--color-violet-700);
+  outline-offset: 2px;
+  border-radius: 0.5rem;
+}
+
+/* ---------- Utilities ---------- */
+@utility text-gradient {
+  background: var(--grad);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+@utility bg-grad { background: var(--grad); }
+@utility dot-grid {
+  background-image: radial-gradient(rgb(155 93 229 / 0.22) 1.2px, transparent 1.2px);
+  background-size: 22px 22px;
+}
+@utility blueprint {
+  background-image:
+    linear-gradient(rgb(155 93 229 / 0.08) 1px, transparent 1px),
+    linear-gradient(90deg, rgb(155 93 229 / 0.08) 1px, transparent 1px);
+  background-size: 28px 28px;
+}
+@utility blueprint-dark {
+  background-image:
+    linear-gradient(rgb(158 98 230 / 0.12) 1px, transparent 1px),
+    linear-gradient(90deg, rgb(158 98 230 / 0.12) 1px, transparent 1px);
+  background-size: 28px 28px;
+}
+@utility tile {
+  background: var(--surface);
+  border-radius: var(--radius-tile);
+  box-shadow: var(--shadow-tile);
+  border: 1px solid rgb(27 16 48 / 0.06);
+}
+@utility skeleton {
+  background: linear-gradient(90deg, #ece8f3 25%, #f6f3fa 37%, #ece8f3 63%);
+  background-size: 400% 100%;
+  animation: shimmer 1.4s ease infinite;
+}
+
+/* Gradient edge used on primary buttons and milestone cards. */
+.grad-edge {
+  position: relative;
+  isolation: isolate;
+}
+.grad-edge::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  padding: 2px;
+  border-radius: inherit;
+  background: var(--grad);
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
+}
+
+/* Lesson Markdown */
+.prose-codeher { color: var(--color-ink); font-size: 1.02rem; line-height: 1.75; }
+.prose-codeher > * + * { margin-top: 0.9em; }
+.prose-codeher h2 { font-weight: 800; font-size: 1.35rem; line-height: 1.25; margin-top: 1.6em; letter-spacing: -0.01em; }
+.prose-codeher h3 { font-weight: 700; font-size: 1.12rem; margin-top: 1.3em; }
+.prose-codeher strong { font-weight: 700; }
+.prose-codeher a { color: var(--color-violet-700); text-decoration: underline; text-underline-offset: 3px; }
+.prose-codeher ul { list-style: none; padding-left: 0; }
+.prose-codeher ul > li { position: relative; padding-left: 1.4em; }
+.prose-codeher ul > li::before { content: ""; position: absolute; left: 0.2em; top: 0.72em; width: 0.45em; height: 0.45em; border-radius: 99px; background: var(--grad); }
+.prose-codeher ol { list-style: decimal; padding-left: 1.3em; }
+.prose-codeher :not(pre) > code {
+  font-family: var(--font-mono); font-size: 0.88em; background: var(--color-violet-100); color: var(--color-violet-800);
+  padding: 0.12em 0.42em; border-radius: 0.4em;
+}
+.prose-codeher pre { background: var(--color-midnight); color: #f7f7f7; border-radius: 1rem; padding: 1rem 1.1rem; overflow-x: auto; font-size: 0.9rem; line-height: 1.6; }
+.prose-codeher pre code { font-family: var(--font-mono); }
+.prose-codeher blockquote { border-left: 4px solid var(--color-pink); background: var(--color-pink-100); padding: 0.75rem 1rem; border-radius: 0 0.9rem 0.9rem 0; }
+.prose-codeher table { width: 100%; border-collapse: collapse; font-size: 0.95rem; }
+.prose-codeher th, .prose-codeher td { border-bottom: 1px solid var(--color-line); padding: 0.45rem 0.6rem; text-align: left; }
+
+/* CodeMirror base */
+.cm-editor { height: 100%; font-size: 15px; }
+.cm-editor.cm-focused { outline: none; }
+.cm-scroller { font-family: var(--font-mono) !important; line-height: 1.65 !important; }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+@media print {
+  .no-print { display: none !important; }
+  body { background: #fff; }
+}
