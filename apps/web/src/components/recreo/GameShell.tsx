@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useCallback, useEffect, useRef, useState, type ReactNode } from "react";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import { ArrowLeft, BookOpenText, Star, Trophy } from "@phosphor-icons/react/dist/ssr";
-import { recreoScoreAction } from "@/app/actions/student";
+import { recreoScoreAction, recreoStatusAction } from "@/app/actions/student";
 import { celebrate } from "@/components/code/celebrate";
 import { Ring } from "@/components/motion/Motion";
 import type { GameId } from "@/server/db/types";
@@ -31,7 +31,17 @@ export interface ShellLabels {
 
 export function GameShell({ game, title, endsAt, minutes, best: initialBest, initialScore, labels, children }: { game: GameId; title: string; endsAt: string; minutes: number; best: number; initialScore: number; labels: ShellLabels; children: (p: GameProps) => ReactNode }) {
   const reduce = useReducedMotion();
-  const end = Date.parse(endsAt);
+  const [end, setEnd] = useState(() => Date.parse(endsAt));
+  // Staff can end (or extend) a free break at any time: re-check the server regularly.
+  useEffect(() => {
+    const id = setInterval(async () => {
+      const r = await recreoStatusAction();
+      if (!r.ok) return;
+      const a = r.data.active;
+      setEnd(a ? Date.parse(a.ends_at) : Date.now());
+    }, 15_000);
+    return () => clearInterval(id);
+  }, []);
   // Clock starts after mount so the server and browser render the same markup.
   const [now, setNow] = useState<number | null>(null);
   const [score, setScore] = useState(initialScore);

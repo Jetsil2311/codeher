@@ -344,3 +344,5 @@ export async function profileFromApiKey(token: string): Promise<Profile | null> 
 }
 
 export const setGroupRecreo = async (_p: Profile, groupId: string, enabled: boolean) => call<void>("staff_set_group_recreo", { p_group: groupId, p_enabled: enabled });
+export const recreoFree = async (_p: Profile, studentIds: string[], minutes: number) => call<number>("staff_recreo_free", { p_students: studentIds, p_minutes: minutes });
+export const groupRecreo = async (_p: Profile, groupId: string) => call<R<typeof L.groupRecreo>>("staff_group_recreo", { p_group: groupId });

@@ -787,3 +787,41 @@ export function setGroupRecreo(p: Profile, groupId: string, enabled: boolean) {
     staffLog(db, p, "recreo_toggled", "group", g.id, { enabled });
   });
 }
+
+// ---------- Recreo libre (port of 0009_recreo_libre.sql) ----------
+export function recreoFree(p: Profile, studentIds: string[], minutes: number) {
+  return write((db) => {
+    const until = minutes > 0 ? new Date(Date.now() + Math.min(minutes, 120) * 60_000).toISOString() : null;
+    db.recreo ??= [];
+    for (const id of studentIds) {
+      const s = requireStudent(db, p, id);
+      let r = db.recreo.find((x) => x.student_id === s.id);
+      if (!r) db.recreo.push((r = { student_id: s.id, tickets: 0, lessons_credited: 0 }));
+      r.free_until = until;
+      r.free_by = p.id;
+      if (!until) (db.recreo_sessions ?? []).filter((x) => x.student_id === s.id && x.free && Date.parse(x.ends_at) > Date.now()).forEach((x) => (x.ends_at = now()));
+    }
+    staffLog(db, p, until ? "recreo_free_granted" : "recreo_free_stopped", "student", null, { students: studentIds.length, minutes });
+    return studentIds.length;
+  });
+}
+
+export function groupRecreo(p: Profile, groupId: string) {
+  return read((db) => {
+    const g = requireGroup(db, p, groupId);
+    const lessonIds = new Set(db.group_courses.filter((gc) => gc.group_id === g.id).flatMap((gc) => courseOrder(db, gc.course_id).map((l) => l.id)));
+    return db.students
+      .filter((s) => s.group_id === g.id && s.status === "active")
+      .sort((a, b) => a.number - b.number)
+      .map((s) => {
+        const r = (db.recreo ?? []).find((x) => x.student_id === s.id);
+        return {
+          id: s.id, code: s.code, nickname: s.nickname, tickets: r?.tickets ?? 0,
+          free_until: r?.free_until && Date.parse(r.free_until) > Date.now() ? r.free_until : null,
+          playing: (db.recreo_sessions ?? []).some((x) => x.student_id === s.id && Date.parse(x.ends_at) > Date.now()),
+          lessons_completed: db.lesson_progress.filter((x) => x.student_id === s.id && x.status === "completed" && lessonIds.has(x.lesson_id)).length,
+          lessons_total: lessonIds.size,
+        };
+      });
+  });
+}

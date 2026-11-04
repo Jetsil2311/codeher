@@ -26,7 +26,7 @@ export default async function StudentLayout({ children }: { children: React.Reac
     <ErrorCatalogProvider rows={await errorCatalog()}>
       <StudentShell
         links={links}
-        me={{ nickname: h.nickname, avatar: h.avatar, xp: h.xp, level: h.level, progress: levelProgress(h.xp), toNext, streak: h.streak, community: h.group.community, tickets: rc.tickets, recreoOn: rc.enabled }}
+        me={{ nickname: h.nickname, avatar: h.avatar, xp: h.xp, level: h.level, progress: levelProgress(h.xp), toNext, streak: h.streak, community: h.group.community, tickets: rc.tickets, recreoOn: rc.enabled || !!rc.free_until }}
         labels={{
           nav: t("nav"),
           signOut: t("signOut"),

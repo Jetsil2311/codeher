@@ -334,7 +334,8 @@ export function recreo(s: Student) {
       enabled: db.groups.find((g) => g.id === s.group_id)?.recreo_enabled !== false,
       tickets: r.tickets, max_tickets: RECREO.maxTickets, lessons_per_ticket: RECREO.lessonsPerTicket, minutes: RECREO.minutes,
       toward_next: Math.min(1, Math.max(0, done - r.lessons_credited)),
-      active: active ? { game: active.game, ends_at: active.ends_at, score: active.score } : null,
+      free_until: r.free_until && Date.parse(r.free_until) > Date.now() ? r.free_until : null,
+      active: active ? { game: active.game, ends_at: active.ends_at, started_at: active.started_at, score: active.score, free: !!active.free } : null,
       best: Object.fromEntries((db.game_scores ?? []).filter((g) => g.student_id === s.id).map((g) => [g.game, g.best])) as Partial<Record<GameId, number>>,
     };
   });
@@ -342,18 +343,22 @@ export function recreo(s: Student) {
 
 export function recreoStart(s: Student, game: GameId) {
   return write((db) => {
-    if (db.groups.find((g) => g.id === s.group_id)?.recreo_enabled === false) throw new AppError("recreo_disabled");
     if (!(GAMES as readonly string[]).includes(game)) throw new AppError("invalid_game");
     const { r } = recreoSync(db, s);
+    const free = !!r.free_until && Date.parse(r.free_until) > Date.now();
+    if (!free && db.groups.find((g) => g.id === s.group_id)?.recreo_enabled === false) throw new AppError("recreo_disabled");
     db.recreo_sessions ??= [];
     const active = db.recreo_sessions.find((x) => x.student_id === s.id && Date.parse(x.ends_at) > Date.now());
     if (active) {
+      if (free && r.free_until! > active.ends_at) Object.assign(active, { ends_at: r.free_until, free: true });
       active.game = game;
       return { game, ends_at: active.ends_at, score: active.score, new: false };
     }
-    if (r.tickets < 1) throw new AppError("no_tickets");
-    r.tickets -= 1;
-    const x: RecreoSession = { id: crypto.randomUUID(), student_id: s.id, game, started_at: now(), ends_at: new Date(Date.now() + RECREO.minutes * 60_000).toISOString(), score: 0 };
+    if (!free) {
+      if (r.tickets < 1) throw new AppError("no_tickets");
+      r.tickets -= 1;
+    }
+    const x: RecreoSession = { id: crypto.randomUUID(), student_id: s.id, game, started_at: now(), ends_at: free ? r.free_until! : new Date(Date.now() + RECREO.minutes * 60_000).toISOString(), score: 0, free };
     db.recreo_sessions.push(x);
     log(db, "student", s.id, "recreo_started", "student", s.id, { game });
     return { game, ends_at: x.ends_at, score: 0, new: true };

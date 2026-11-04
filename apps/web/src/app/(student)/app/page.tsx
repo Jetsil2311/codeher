@@ -81,10 +81,10 @@ export default async function Inicio() {
               <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-mint/15 text-mint"><Flask size={20} weight="duotone" aria-hidden /></span>
               <span className="min-w-0 text-sm font-bold leading-tight">{t("quickLab")}<span className="block text-xs font-medium text-[#b8acd6]">{t("quickLabBody")}</span></span>
             </Link>
-            <Link href={rc.enabled ? "/app/recreo" : "/app/ruta"} className={cx("group relative flex items-center gap-3 overflow-hidden rounded-2xl p-3 ring-1 transition", rc.enabled && rc.tickets > 0 ? "bg-gradient-to-br from-sun/25 to-pink/25 ring-sun/40 hover:from-sun/35" : "bg-white/[0.07] ring-white/10 hover:bg-white/[0.12]")}>
+            <Link href={rc.enabled || rc.free_until ? "/app/recreo" : "/app/ruta"} className={cx("group relative flex items-center gap-3 overflow-hidden rounded-2xl p-3 ring-1 transition", (rc.enabled && rc.tickets > 0) || rc.free_until ? "bg-gradient-to-br from-sun/25 to-pink/25 ring-sun/40 hover:from-sun/35" : "bg-white/[0.07] ring-white/10 hover:bg-white/[0.12]")}>
               <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-sun/15 text-sun"><Ticket size={20} weight={rc.tickets > 0 ? "fill" : "duotone"} aria-hidden /></span>
-              <span className="min-w-0 text-sm font-bold leading-tight">{tr("homeTitle")}<span className="block text-xs font-medium text-[#d6cdea]">{rc.enabled ? tr("homeBody", { n: rc.tickets }) : tr("disabled")}</span></span>
-              {rc.enabled && rc.tickets > 0 && <span className="absolute right-2 top-2 size-2.5 rounded-full bg-pink motion-safe:animate-pulse" aria-hidden />}
+              <span className="min-w-0 text-sm font-bold leading-tight">{tr("homeTitle")}<span className="block text-xs font-medium text-[#d6cdea]">{rc.free_until ? tr("homeFree") : rc.enabled ? tr("homeBody", { n: rc.tickets }) : tr("disabled")}</span></span>
+              {((rc.enabled && rc.tickets > 0) || rc.free_until) && <span className="absolute right-2 top-2 size-2.5 rounded-full bg-pink motion-safe:animate-pulse" aria-hidden />}
             </Link>
           </div>
         </StaggerItem>

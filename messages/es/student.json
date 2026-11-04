@@ -366,6 +366,9 @@
       "winBody": "El agua llegó a todas las plantas.",
       "next": "Siguiente",
       "tip": "Toca una tubería para girarla. El agua sale del pozo azul y debe llegar a cada planta."
-    }
+    },
+    "freeTitle": "¡Recreo libre!",
+    "freeBody": "Tu educadora te dio tiempo de juego sin boletos. Te quedan {time}.",
+    "homeFree": "¡Recreo libre activo!"
   }
 }

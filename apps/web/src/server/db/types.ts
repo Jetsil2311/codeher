@@ -74,8 +74,8 @@ export interface AccessLog { id: number; actor_kind: "staff" | "student" | "syst
 
 export const GAMES = ["robotina", "interruptores", "nonogramas", "torres", "flujo"] as const;
 export type GameId = (typeof GAMES)[number];
-export interface StudentRecreo { student_id: string; tickets: number; lessons_credited: number }
-export interface RecreoSession { id: string; student_id: string; game: GameId; started_at: string; ends_at: string; score: number }
+export interface StudentRecreo { student_id: string; tickets: number; lessons_credited: number; free_until?: string | null; free_by?: string | null }
+export interface RecreoSession { id: string; student_id: string; game: GameId; started_at: string; ends_at: string; score: number; free?: boolean }
 export interface GameScore { student_id: string; game: GameId; best: number; plays: number }
 
 export interface Settings {

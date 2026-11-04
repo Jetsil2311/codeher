@@ -6,14 +6,14 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { LayoutGroup, motion, useReducedMotion } from "motion/react";
 import { useState, type ReactNode } from "react";
-import { BookOpen, Bug, ChartBar, ClipboardText, DotsThreeOutline, Gear, Globe, Key, MagnifyingGlass, SignOut, SquaresFour, Trophy, Users, UsersThree, CaretRight } from "@phosphor-icons/react/dist/ssr";
+import { ChalkboardTeacher, BookOpen, Bug, ChartBar, ClipboardText, DotsThreeOutline, Gear, Globe, Key, MagnifyingGlass, SignOut, SquaresFour, Trophy, Users, UsersThree, CaretRight } from "@phosphor-icons/react/dist/ssr";
 import { Wordmark } from "@/components/brand/Wordmark";
 import { cx } from "@/components/ui";
 import { Sheet } from "@/components/motion/Sheet";
 import { spring } from "@/components/motion/Segmented";
 import { staffSignOutAction } from "@/app/actions/staff";
 
-const ICONS = { panel: SquaresFour, groups: UsersThree, lessons: BookOpen, logros: Trophy, errors: Bug, keys: Key, global: Globe, search: MagnifyingGlass, educators: Users, curation: ChartBar, audit: ClipboardText, settings: Gear };
+const ICONS = { script: ChalkboardTeacher, panel: SquaresFour, groups: UsersThree, lessons: BookOpen, logros: Trophy, errors: Bug, keys: Key, global: Globe, search: MagnifyingGlass, educators: Users, curation: ChartBar, audit: ClipboardText, settings: Gear };
 export type StaffKey = keyof typeof ICONS;
 export interface StaffLink { href: string; key: StaffKey; label: string; exact?: boolean }
 

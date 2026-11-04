@@ -139,3 +139,12 @@ export async function recreoScoreAction(game: string, score: number) {
   const s = await requireStudent();
   return attempt(() => S.recreoScore(s, gameSchema.parse(game), z.number().int().min(0).max(1000).parse(score)));
 }
+
+/** Lets an open game notice when staff end or extend a free break. */
+export async function recreoStatusAction() {
+  const s = await requireStudent();
+  return attempt(async () => {
+    const r = await S.recreo(s);
+    return { active: r.active, free_until: r.free_until };
+  });
+}

@@ -1,9 +1,11 @@
 "use client";
+import Link from "next/link";
 import { Segmented } from "@/components/motion/Segmented";
 import { useEffect, useMemo, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { ArrowDown, ArrowUp, CheckCircle, Copy, Eye, FloppyDisk, PencilSimple, Plus, PresentationChart, Trash, Warning, XCircle } from "@phosphor-icons/react/dist/ssr";
+import { ChalkboardTeacher } from "@phosphor-icons/react/dist/ssr";
 import { checkPublishable, PYTHON_CONSTRUCTS, testSchema, validationFingerprint, type CodeLanguage, type Test } from "@codeher/core";
 import { parses } from "@codeher/grader/pseudo";
 import { CodeEditor } from "@/components/code/CodeEditor";
@@ -228,6 +230,7 @@ export function LessonEditor({ data, founder, pseudoConstructs }: { data: Data; 
         {ro ? <Tag tone="ink">{t("readOnly")}</Tag> : null}
         <span className="ml-auto flex gap-2">
           <a href={l.visibility === "public" ? `/probar/${l.slug}` : `/app/leccion/${l.slug}`} target="_blank" rel="noopener noreferrer" className="inline-flex h-10 items-center gap-1.5 rounded-full bg-white px-4 text-sm font-semibold ring-1 ring-ink/12"><Eye size={16} aria-hidden /> {t("viewAsStudent")}</a>
+          <Link href={`/equipo/guion/${l.id}`} className="inline-flex h-10 items-center gap-1.5 rounded-full bg-midnight px-4 text-sm font-semibold text-paper"><ChalkboardTeacher size={16} weight="fill" aria-hidden /> {t("script")}</Link>
           <button type="button" onClick={() => start(async () => { await duplicateLessonAction(l.id); })} className="inline-flex h-10 items-center gap-1.5 rounded-full bg-white px-4 text-sm font-semibold ring-1 ring-ink/12"><Copy size={16} aria-hidden /> {t("duplicate")}</button>
         </span>
       </div>

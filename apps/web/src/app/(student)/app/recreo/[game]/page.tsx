@@ -26,7 +26,7 @@ export default async function Juego({ params }: { params: Promise<{ game: string
       game={id}
       title={t(`games.${id}.title`)}
       endsAt={status.active.ends_at}
-      minutes={status.minutes}
+      minutes={Math.max(1, Math.round((Date.parse(status.active.ends_at) - Date.parse(status.active.started_at ?? status.active.ends_at)) / 60000)) || status.minutes}
       best={status.best[id] ?? 0}
       initialScore={0}
       shell={raw("shell") as never}

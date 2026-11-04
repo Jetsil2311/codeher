@@ -5,7 +5,8 @@ import { getTranslations } from "next-intl/server";
 import { StudentTools } from "@/components/staff/StudentTools";
 import { PageHead, Panel, Stat, TableWrap, relTime, td, th } from "@/components/staff/StaffUi";
 import { Avatar, LanguageBadge, LessonState, Tag } from "@/components/ui";
-import { studentDetail } from "@/server/services/staff";
+import { groupRecreo, studentDetail } from "@/server/services/staff";
+import { RecreoLibre } from "@/components/staff/RecreoLibre";
 import { requireStaff } from "@/server/session";
 
 export default async function Estudiante({ params }: { params: Promise<{ id: string }> }) {
@@ -18,6 +19,8 @@ export default async function Estudiante({ params }: { params: Promise<{ id: str
   const tc = await getTranslations("common");
   const labels = { locked: tp("locked"), progress: tp("inProgress"), done: tp("completed"), new: tp("new") };
   const fmt = new Intl.DateTimeFormat("es-MX", { dateStyle: "medium", timeStyle: "short", timeZone: "America/Mexico_City" });
+  const tr = await getTranslations("staff.recreoLibre");
+  const recreoRow = (await groupRecreo(p, s.group.id)).filter((r) => r.id === s.id);
   return (
     <>
       <PageHead
@@ -33,6 +36,12 @@ export default async function Estudiante({ params }: { params: Promise<{ id: str
       </div>
       <div className="mt-6 grid gap-6 lg:grid-cols-[1.3fr_1fr]">
         <div className="space-y-6">
+          {recreoRow.length > 0 && (
+            <Panel title={tr("title")}>
+              <p className="-mt-2 mb-3 text-sm text-ink-muted">{tr("body")}</p>
+              <RecreoLibre single rows={recreoRow} labels={Object.fromEntries(["grant","grantFinished","grantAll","stop","stopAll","finished","lessons","freeLeft","playing","granted","stopped","error","empty"].map((k) => [k, (tr.raw as unknown as (k: string) => string)(k)]))} />
+            </Panel>
+          )}
           <Panel title={t("progress")}>
             <ul className="space-y-2">
               {s.lessons.map((l) => (

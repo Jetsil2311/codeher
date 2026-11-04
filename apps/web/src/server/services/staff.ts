@@ -60,3 +60,5 @@ export const listApiKeys = pick(L.listApiKeys, R.listApiKeys);
 export const revokeApiKey = pick(L.revokeApiKey, R.revokeApiKey);
 export const profileFromApiKey = pick(L.profileFromApiKey, R.profileFromApiKey);
 export const setGroupRecreo = pick(L.setGroupRecreo, R.setGroupRecreo);
+export const recreoFree = pick(L.recreoFree, R.recreoFree);
+export const groupRecreo = pick(L.groupRecreo, R.groupRecreo);

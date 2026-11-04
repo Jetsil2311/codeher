@@ -336,3 +336,10 @@ export async function setGroupRecreoAction(groupId: string, enabled: boolean) {
   revalidatePath(`/equipo/grupos/${groupId}`);
   return res;
 }
+
+export async function recreoFreeAction(studentIds: string[], minutes: number, path?: string) {
+  const p = await requireStaff();
+  const res = await attempt(() => T.recreoFree(p, z.array(z.string().uuid()).min(1).max(300).parse(studentIds), z.number().int().min(0).max(120).parse(minutes)));
+  if (path) revalidatePath(path);
+  return res;
+}

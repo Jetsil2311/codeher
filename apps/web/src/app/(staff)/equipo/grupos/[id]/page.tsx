@@ -3,8 +3,11 @@ import { notFound } from "next/navigation";
 import { getTranslations } from "next-intl/server";
 import { GroupManager } from "@/components/staff/GroupManager";
 import { PageHead, Stat, monthName } from "@/components/staff/StaffUi";
+import { Sparkle } from "@phosphor-icons/react/dist/ssr";
 import { Tag } from "@/components/ui";
-import { groupDetail } from "@/server/services/staff";
+import { groupDetail, groupRecreo } from "@/server/services/staff";
+import { RecreoLibre } from "@/components/staff/RecreoLibre";
+import { Panel } from "@/components/staff/StaffUi";
 import { requireStaff } from "@/server/session";
 
 export default async function Grupo({ params }: { params: Promise<{ id: string }> }) {
@@ -13,6 +16,8 @@ export default async function Grupo({ params }: { params: Promise<{ id: string }
   if (!g) notFound();
   const t = await getTranslations("staff.group");
   const tc = await getTranslations("common");
+  const tr = await getTranslations("staff.recreoLibre");
+  const recreoRows = await groupRecreo(p, g.id);
   return (
     <>
       <PageHead
@@ -27,6 +32,10 @@ export default async function Grupo({ params }: { params: Promise<{ id: string }
         <Stat label={t("avgCompleted")} value={g.avg_completed} tone="violet" icon={<ChartLineUp size={19} weight="fill" aria-hidden />} />
       </div>
       <p className="mb-4 text-sm text-ink-muted">{t("educators")}: {g.educators.map((e) => e.name).join(", ") || "·"}</p>
+      <Panel className="mb-6" title={<span className="inline-flex items-center gap-2"><Sparkle size={20} weight="fill" className="text-pink-700" aria-hidden /> {tr("title")}</span>}>
+        <p className="-mt-2 mb-4 text-sm text-ink-muted">{tr("body")}</p>
+        <RecreoLibre rows={recreoRows} labels={Object.fromEntries(["grant","grantFinished","grantAll","stop","stopAll","finished","lessons","freeLeft","playing","granted","stopped","error","empty"].map((k) => [k, (tr.raw as unknown as (k: string) => string)(k)]))} />
+      </Panel>
       <GroupManager g={g} never={tc("never")} />
     </>
   );

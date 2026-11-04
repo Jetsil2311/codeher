@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { motion, useReducedMotion } from "motion/react";
-import { Brain, Lightbulb, Lock, Path, Play, Robot, SquaresFour, Ticket, Timer, Drop, ArrowRight, CircleNotch } from "@phosphor-icons/react/dist/ssr";
+import { Sparkle, Brain, Lightbulb, Lock, Path, Play, Robot, SquaresFour, Ticket, Timer, Drop, ArrowRight, CircleNotch } from "@phosphor-icons/react/dist/ssr";
 import { startRecreoAction } from "@/app/actions/student";
 import { Sheet } from "@/components/motion/Sheet";
 import { Stagger, StaggerItem } from "@/components/motion/Motion";
@@ -18,7 +18,8 @@ export interface RecreoStatus {
   lessons_per_ticket: number;
   minutes: number;
   toward_next: number;
-  active: { game: GameId; ends_at: string; score: number } | null;
+  free_until: string | null;
+  active: { game: GameId; ends_at: string; score: number; started_at?: string; free?: boolean } | null;
   best: Partial<Record<GameId, number>>;
 }
 
@@ -71,7 +72,7 @@ export function RecreoHub({ status, games, labels }: { status: RecreoStatus; gam
   const [now, setNow] = useState<number | null>(null);
   useEffect(() => {
     setNow(Date.now());
-    if (!status.active) return;
+    if (!status.active && !status.free_until) return;
     const id = setInterval(() => setNow(Date.now()), 1000);
     return () => clearInterval(id);
   }, [status.active]);
@@ -90,11 +91,13 @@ export function RecreoHub({ status, games, labels }: { status: RecreoStatus; gam
     }
   };
   const choose = (game: GameId) => {
+    if (free || activeNow) return go(game);
     if (!status.enabled) return;
-    if (activeNow) return go(game);
     if (status.tickets > 0) return setPick(game);
   };
-  const remaining = status.lessons_per_ticket - status.toward_next;
+  const freeLeft = status.free_until ? Math.max(0, Date.parse(status.free_until) - (now ?? Date.parse(status.free_until) - 1)) : 0;
+  const free = freeLeft > 0;
+  const freeTime = `${Math.floor(freeLeft / 60000)}:${String(Math.floor((freeLeft % 60000) / 1000)).padStart(2, "0")}`;
 
   return (
     <div className="space-y-6">
@@ -124,7 +127,7 @@ export function RecreoHub({ status, games, labels }: { status: RecreoStatus; gam
             </div>
           </div>
         </div>
-        {!status.enabled && <p className="mt-4 rounded-2xl bg-white/10 px-4 py-3 text-sm font-semibold">{labels.disabled}</p>}
+        {!status.enabled && !free && <p className="mt-4 rounded-2xl bg-white/10 px-4 py-3 text-sm font-semibold">{labels.disabled}</p>}
         {activeNow && (
           <div className="mt-4 flex items-center gap-3 rounded-2xl bg-white px-4 py-3 text-ink">
             <Timer size={24} weight="fill" className="shrink-0 text-pink-700" aria-hidden />
@@ -132,17 +135,30 @@ export function RecreoHub({ status, games, labels }: { status: RecreoStatus; gam
             <button type="button" onClick={() => go(status.active!.game)} className="inline-flex h-10 shrink-0 items-center gap-1 rounded-full bg-ink px-4 text-sm font-bold text-paper">{labels.play} <ArrowRight size={14} weight="bold" aria-hidden /></button>
           </div>
         )}
-        {!activeNow && status.tickets === 0 && status.enabled && (
+        {!activeNow && !free && status.tickets === 0 && status.enabled && (
           <Link href="/app/ruta" className="mt-4 inline-flex h-11 items-center gap-2 rounded-full bg-pink px-5 text-sm font-bold text-ink"><Path size={18} weight="bold" aria-hidden /> {labels.goLearn}</Link>
         )}
         {error && <p role="alert" className="mt-3 rounded-2xl bg-pink-100 px-4 py-3 text-sm font-semibold text-ink">{error}</p>}
       </section>
 
+      {free && (
+        <motion.section initial={reduce ? false : { opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} className="relative isolate overflow-hidden rounded-[1.75rem] bg-gradient-to-br from-sun via-pink to-violet p-5 text-ink shadow-[var(--shadow-pop)] md:p-6">
+          <div className="dot-grid absolute inset-0 -z-10 opacity-30 mix-blend-overlay" aria-hidden />
+          <div className="flex items-center gap-4">
+            <span className="grid size-14 shrink-0 place-items-center rounded-2xl bg-white/90 text-pink-700 shadow-lg"><Sparkle size={30} weight="fill" aria-hidden /></span>
+            <div className="min-w-0 flex-1">
+              <p className="text-xl font-extrabold tracking-tight md:text-2xl">{labels.freeTitle}</p>
+              <p className="text-sm font-semibold text-ink/80">{labels.freeBody.replace("{time}", now === null ? "…" : freeTime)}</p>
+            </div>
+          </div>
+        </motion.section>
+      )}
+
       {/* Games */}
       <Stagger as="ul" className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {games.map((g) => {
           const a = ART[g.id];
-          const can = status.enabled && (activeNow || status.tickets > 0);
+          const can = free || activeNow || (status.enabled && status.tickets > 0);
           const best = status.best[g.id];
           return (
             <StaggerItem as="li" key={g.id}>
@@ -163,7 +179,7 @@ export function RecreoHub({ status, games, labels }: { status: RecreoStatus; gam
                     <span className="text-xs font-bold text-ink-muted">{best ? labels.best.replace("{n}", String(best)) : labels.noBest}</span>
                     <span className={cx("inline-flex h-10 items-center gap-1.5 rounded-full px-4 text-sm font-bold transition", can ? "bg-ink text-paper group-hover:bg-pink group-hover:text-ink" : "bg-ink/[0.06] text-ink-muted")}>
                       {busy === g.id ? <CircleNotch size={16} className="animate-spin" aria-hidden /> : can ? <Play size={14} weight="fill" aria-hidden /> : <Lock size={14} weight="bold" aria-hidden />}
-                      {busy === g.id ? labels.starting : can ? (activeNow ? labels.play : labels.useTicket) : labels.locked}
+                      {busy === g.id ? labels.starting : can ? (activeNow || free ? labels.play : labels.useTicket) : labels.locked}
                     </span>
                   </span>
                 </span>

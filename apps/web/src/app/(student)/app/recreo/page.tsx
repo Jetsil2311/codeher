@@ -28,7 +28,7 @@ export default async function Recreo() {
             tickets: t("tickets"), ticketsOf: t("ticketsOf", { n: status.tickets, max: status.max_tickets }), progress: t("progress", { n: toward }),
             full: t("full"), disabled: t("disabled"), active: t("active"), activeBody: t.raw("activeBody") as string, play: t("play"), useTicket: t("useTicket"),
             locked: t("locked"), best: t.raw("best") as string, noBest: t("noBest"), goLearn: t("goLearn"), starting: t("starting"), skills: t("skills"),
-            confirmTitle: t("confirmTitle"), confirmBody: t("confirmBody"), confirm: t("confirm"), cancel: t("cancel"), close: t("close"), maxNote: t("maxNote"),
+            freeTitle: t("freeTitle"), freeBody: t.raw("freeBody") as string, confirmTitle: t("confirmTitle"), confirmBody: t("confirmBody"), confirm: t("confirm"), cancel: t("cancel"), close: t("close"), maxNote: t("maxNote"),
             err_no_tickets: te("no_tickets"), err_recreo_disabled: te("recreo_disabled"), err_invalid_game: te("invalid_game"), err_unexpected: te("unexpected"),
           }}
         />

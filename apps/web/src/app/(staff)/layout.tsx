@@ -13,6 +13,7 @@ export default async function StaffLayout({ children }: { children: React.ReactN
   const program: StaffLink[] = [
     { href: "/equipo/panel", key: "panel", label: t("panel") },
     { href: "/equipo/grupos", key: "groups", label: t("groups") },
+    { href: "/equipo/guion", key: "script", label: t("script") },
     { href: "/equipo/lecciones", key: "lessons", label: t("lessons") },
     { href: "/equipo/logros", key: "logros", label: t("logros") },
   ];
