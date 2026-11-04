@@ -27,12 +27,14 @@ const json = (status: number, body: unknown, extra: Record<string, string> = {})
 
 function buildServer(ctx: ToolCtx) {
   const server = new Server(
-    { name: "codeher", title: "CODEHER", version: "1.1.0" },
+    { name: "codeher", title: "CODEHER", version: "2.0.0" },
     {
       capabilities: { tools: {} },
       instructions:
         "Herramientas para crear contenido educativo de CODEHER (programación para chicas de 12 a 18 años, en español de México). " +
-        "Llama primero a get_authoring_guide. Todo lo que guardes queda como borrador hasta que una persona del equipo lo publique.",
+        "Llama primero a get_authoring_guide. Tienes el mismo control que la dueña de la clave en la plataforma: crear, editar, ordenar, " +
+        "publicar y borrar cursos, módulos, lecciones, ejercicios y diapositivas. Lo nuevo se crea como borrador. " +
+        "Antes de publicar o borrar algo, confírmalo con la persona salvo que ya te lo haya pedido.",
     },
   );
   server.setRequestHandler(ListToolsRequestSchema, async () => ({
