@@ -1,10 +1,10 @@
 import Link from "next/link";
 import { getTranslations } from "next-intl/server";
-import { ArrowRight, ArrowUpRight, BookOpenText, CheckCircle, Code, Fire, Flask, FolderSimple, LockSimple, Medal, Plus, Star, Trophy, Lightning, Rocket, Translate, Heart, Sparkle } from "@phosphor-icons/react/dist/ssr";
+import { Ticket, ArrowRight, ArrowUpRight, BookOpenText, CheckCircle, Code, Fire, Flask, FolderSimple, LockSimple, Medal, Plus, Star, Trophy, Lightning, Rocket, Translate, Heart, Sparkle } from "@phosphor-icons/react/dist/ssr";
 import { levelProgress, xpToNextLevel } from "@codeher/core";
 import { LanguageBadge, cx } from "@/components/ui";
 import { CountUp, Ring, Stagger, StaggerItem } from "@/components/motion/Motion";
-import { home } from "@/server/services/student";
+import { home, recreo } from "@/server/services/student";
 import { requireStudent } from "@/server/session";
 
 const BADGE_ICONS: Record<string, typeof Medal> = {
@@ -22,7 +22,8 @@ const BADGE_TONES = ["from-violet to-pink", "from-pink to-[#ff9f6b]", "from-[#00
 
 export default async function Inicio() {
   const s = await requireStudent();
-  const h = await home(s);
+  const [h, rc] = await Promise.all([home(s), recreo(s)]);
+  const tr = await getTranslations("student.recreo");
   const t = await getTranslations("student.home");
   const tl = await getTranslations("learn.language");
   const tb = await getTranslations("student.badges");
@@ -80,9 +81,10 @@ export default async function Inicio() {
               <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-mint/15 text-mint"><Flask size={20} weight="duotone" aria-hidden /></span>
               <span className="min-w-0 text-sm font-bold leading-tight">{t("quickLab")}<span className="block text-xs font-medium text-[#b8acd6]">{t("quickLabBody")}</span></span>
             </Link>
-            <Link href="/app/ruta" className="group flex items-center gap-3 rounded-2xl bg-white/[0.07] p-3 ring-1 ring-white/10 transition hover:bg-white/[0.12]">
-              <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-sun/15 text-sun"><Trophy size={20} weight="duotone" aria-hidden /></span>
-              <span className="min-w-0 text-sm font-bold leading-tight">{t("quickPath")}<span className="block text-xs font-medium text-[#b8acd6]">{t("lessons", { done: h.lessons_completed, total: h.lessons_total })}</span></span>
+            <Link href={rc.enabled ? "/app/recreo" : "/app/ruta"} className={cx("group relative flex items-center gap-3 overflow-hidden rounded-2xl p-3 ring-1 transition", rc.enabled && rc.tickets > 0 ? "bg-gradient-to-br from-sun/25 to-pink/25 ring-sun/40 hover:from-sun/35" : "bg-white/[0.07] ring-white/10 hover:bg-white/[0.12]")}>
+              <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-sun/15 text-sun"><Ticket size={20} weight={rc.tickets > 0 ? "fill" : "duotone"} aria-hidden /></span>
+              <span className="min-w-0 text-sm font-bold leading-tight">{tr("homeTitle")}<span className="block text-xs font-medium text-[#d6cdea]">{rc.enabled ? tr("homeBody", { n: rc.tickets }) : tr("disabled")}</span></span>
+              {rc.enabled && rc.tickets > 0 && <span className="absolute right-2 top-2 size-2.5 rounded-full bg-pink motion-safe:animate-pulse" aria-hidden />}
             </Link>
           </div>
         </StaggerItem>

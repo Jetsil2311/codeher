@@ -25,3 +25,7 @@ export const projectVersion = pick(L.projectVersion, R.projectVersion);
 export const nominateProject = pick(L.nominateProject, R.nominateProject);
 export const updateProfile = pick(L.updateProfile, R.updateProfile);
 export const changePin = pick(L.changePin, R.changePin);
+export const recreo = pick(L.recreo, R.recreo);
+export const recreoStart = pick(L.recreoStart, R.recreoStart);
+export const recreoScore = pick(L.recreoScore, R.recreoScore);
+export { RECREO } from "./local/student";

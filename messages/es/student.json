@@ -66,7 +66,9 @@
     "profileShort": "Perfil",
     "xpToNext": "Te faltan {n} XP para el siguiente nivel",
     "account": "Tu cuenta",
-    "close": "Cerrar"
+    "close": "Cerrar",
+    "recreo": "Recreo",
+    "tickets": "boletos de recreo"
   },
   "home": {
     "hello": "¡Hola, {name}!",
@@ -233,5 +235,137 @@
     "pinHelp": "Evita 1234, 0000, números repetidos o tu año de nacimiento.",
     "updatePin": "Cambiar PIN",
     "pinChanged": "¡Listo! Tu PIN cambió."
+  },
+  "recreo": {
+    "title": "Recreo",
+    "titleAccent": "para tu mente",
+    "subtitle": "Cada 2 lecciones completadas ganas un boleto. Un boleto es un recreo de 5 minutos con juegos que entrenan la lógica.",
+    "tickets": "Boletos",
+    "ticketsOf": "{n} de {max}",
+    "maxNote": "Puedes guardar hasta 2 boletos.",
+    "progress": "{n, plural, =0 {Completa 2 lecciones para ganar tu próximo boleto} one {Te falta 1 lección para tu próximo boleto} other {Te faltan # lecciones}}",
+    "full": "¡Tienes los boletos llenos! Úsalos antes de ganar más.",
+    "disabled": "Tu grupo pausó los recreos por ahora. Tu educadora los activará pronto.",
+    "active": "Recreo en curso",
+    "activeBody": "Te quedan {time}. Cambiar de juego no gasta otro boleto.",
+    "play": "Jugar",
+    "useTicket": "Usar 1 boleto",
+    "locked": "Necesitas un boleto",
+    "best": "Mejor: {n}",
+    "noBest": "Sin récord",
+    "goLearn": "Ir a mi ruta",
+    "starting": "Abriendo…",
+    "skills": "Entrena",
+    "confirmTitle": "¿Empezar recreo?",
+    "confirmBody": "Usarás 1 boleto y tendrás 5 minutos para jugar. Puedes cambiar de juego dentro del recreo.",
+    "confirm": "Sí, a jugar",
+    "cancel": "Ahora no",
+    "close": "Cerrar",
+    "homeTitle": "Recreo",
+    "homeBody": "{n, plural, =0 {Completa lecciones para ganar boletos} one {Tienes 1 boleto listo} other {Tienes # boletos listos}}",
+    "shell": {
+      "back": "Volver al recreo",
+      "score": "Puntos",
+      "best": "Récord",
+      "timeLeft": "Tiempo restante",
+      "overTitle": "¡Se acabó el recreo!",
+      "overBody": "Tu mente ya descansó. ¿Seguimos aprendiendo?",
+      "backToLearn": "Volver a aprender",
+      "moreGames": "Ver juegos",
+      "solved": "¡Resuelto! +{n}"
+    },
+    "games": {
+      "robotina": {
+        "title": "Robotina",
+        "tagline": "Programa al robot para juntar todas las estrellas.",
+        "skill": "Algoritmos y ciclos"
+      },
+      "interruptores": {
+        "title": "Interruptores",
+        "tagline": "Prende todos los focos con lógica Y, O, NO.",
+        "skill": "Lógica"
+      },
+      "nonogramas": {
+        "title": "Nonogramas",
+        "tagline": "Descubre el dibujo escondido con pistas de números.",
+        "skill": "Deducción"
+      },
+      "torres": {
+        "title": "Torres",
+        "tagline": "Mueve la torre completa, disco por disco.",
+        "skill": "Planeación"
+      },
+      "flujo": {
+        "title": "Flujo",
+        "tagline": "Gira las tuberías para regar toda la milpa.",
+        "skill": "Conexiones"
+      }
+    },
+    "robotina": {
+      "level": "Nivel",
+      "blocks": "Bloques",
+      "F": "Avanza",
+      "L": "Izquierda",
+      "R": "Derecha",
+      "loops": "Repetir programa",
+      "run": "Ejecutar",
+      "undo": "Borrar último",
+      "clear": "Empezar de nuevo",
+      "retry": "Corregir",
+      "crash": "¡Choque! Revisa los giros.",
+      "missing": "Faltan estrellas por juntar.",
+      "win": "¡Lo lograste!",
+      "winBody": "Tu programa juntó todas las estrellas.",
+      "next": "Siguiente",
+      "program": "Tu programa",
+      "empty": "Toca los bloques de abajo para armar el programa.",
+      "robot": "Robotina",
+      "tip": "Toca un bloque Avanza para repetirlo hasta 4 veces. Si el camino se repite, usa Repetir programa."
+    },
+    "interruptores": {
+      "level": "Nivel",
+      "moves": "Cambios",
+      "on": "Foco prendido",
+      "off": "Foco apagado",
+      "switch": "Interruptor",
+      "win": "¡Todo prendido!",
+      "winBody": "Cambios usados: {n}.",
+      "next": "Siguiente",
+      "tip": "Y necesita que ambos lados sean Verdadero. O necesita al menos uno. NO invierte el valor."
+    },
+    "nonogramas": {
+      "level": "Dibujo",
+      "mode": "Modo",
+      "fill": "Pintar",
+      "cross": "Marcar X",
+      "cell": "Casilla",
+      "win": "¡Es un {name}!",
+      "winBody": "Cada número fue una pista bien usada.",
+      "next": "Siguiente",
+      "tip": "Los números dicen cuántas casillas seguidas van pintadas en esa fila o columna, en orden. Marca con X las que seguro van vacías."
+    },
+    "torres": {
+      "discs": "Discos",
+      "moves": "Movimientos",
+      "min": "Mínimo",
+      "peg": "Torre",
+      "selected": "seleccionada",
+      "restart": "Reiniciar",
+      "perfect": "¡Perfecto!",
+      "perfectBody": "Usaste el mínimo de movimientos posible.",
+      "win": "¡Torre completa!",
+      "winBody": "Lo hiciste en {n} movimientos (el mínimo es {min}).",
+      "next": "Más discos",
+      "again": "Otra vez",
+      "tip": "Toca una torre para levantar su disco de arriba y otra para dejarlo. Un disco grande nunca va sobre uno chico."
+    },
+    "flujo": {
+      "level": "Nivel",
+      "tile": "Tubería",
+      "win": "¡Milpa regada!",
+      "winBody": "El agua llegó a todas las plantas.",
+      "next": "Siguiente",
+      "tip": "Toca una tubería para girarla. El agua sale del pozo azul y debe llegar a cada planta."
+    }
   }
 }

@@ -24,6 +24,7 @@ export interface Community { id: string; slug: string; name: string; state: stri
 export interface Group {
   id: string; year: number; month: number; letter: string | null; community_id: string; label: string;
   status: "active" | "closed"; ends_on: string | null; next_number: number; created_by: string | null; created_at: string; closed_at: string | null;
+  recreo_enabled?: boolean;
 }
 export interface EducatorGroup { educator_id: string; group_id: string; assigned_at: string }
 export interface Student {
@@ -71,6 +72,12 @@ export interface ErrorTranslation { id: string; language: CodeLanguage | null; e
 export interface ApiKey { id: string; owner_id: string; name: string; key_prefix: string; key_hash: string; created_at: string; last_used_at: string | null; expires_at: string; revoked_at: string | null }
 export interface AccessLog { id: number; actor_kind: "staff" | "student" | "system" | "mcp"; actor_id: string | null; action: string; entity_type: string; entity_id: string | null; payload: Record<string, unknown>; created_at: string }
 
+export const GAMES = ["robotina", "interruptores", "nonogramas", "torres", "flujo"] as const;
+export type GameId = (typeof GAMES)[number];
+export interface StudentRecreo { student_id: string; tickets: number; lessons_credited: number }
+export interface RecreoSession { id: string; student_id: string; game: GameId; started_at: string; ends_at: string; score: number }
+export interface GameScore { student_id: string; game: GameId; best: number; plays: number }
+
 export interface Settings {
   session_hours: number;
   lockout: { soft_after: number; soft_minutes: number; hard_after: number };
@@ -111,5 +118,8 @@ export interface Db {
   api_keys: ApiKey[];
   access_log: AccessLog[];
   content_audit_log: AccessLog[];
+  recreo?: StudentRecreo[];
+  recreo_sessions?: RecreoSession[];
+  game_scores?: GameScore[];
   seq: number;
 }

@@ -3,9 +3,9 @@ import Link from "next/link";
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
-import { ArrowsClockwise, DownloadSimple, Key, LockSimpleOpen, Plus, Printer, CheckCircle, LockSimple, Warning } from "@phosphor-icons/react/dist/ssr";
+import { Ticket, ArrowsClockwise, DownloadSimple, Key, LockSimpleOpen, Plus, Printer, CheckCircle, LockSimple, Warning } from "@phosphor-icons/react/dist/ssr";
 import type { GroupDetail } from "@/server/services/staff";
-import { addStudentsAction, assignCourseAction, resetPinAction, setGroupStatusAction, setStudentsStatusAction, unlockStudentAction, updateGroupAction } from "@/app/actions/staff";
+import { setGroupRecreoAction, addStudentsAction, assignCourseAction, resetPinAction, setGroupStatusAction, setStudentsStatusAction, unlockStudentAction, updateGroupAction } from "@/app/actions/staff";
 import { Field, LanguageBadge, Tag, inputClass, textareaClass, cx } from "@/components/ui";
 import { AccessCards, type CardData } from "./AccessCards";
 import { Panel, TableWrap, relTime, td, th } from "./StaffUi";
@@ -164,6 +164,16 @@ export function GroupManager({ g, never }: { g: GroupDetail; never: string }) {
           <Field label={t("endsOn")} htmlFor="gends"><input id="gends" type="date" value={endsOn} onChange={(e) => setEndsOn(e.target.value)} className={inputClass} /></Field>
           <button type="submit" className="h-12 rounded-full bg-violet-700 px-5 font-semibold text-white">{t("save")}</button>
         </form>
+        <div className="mt-6 flex items-center gap-4 rounded-2xl bg-paper p-4">
+          <span className="grid size-11 shrink-0 place-items-center rounded-xl bg-gradient-to-br from-sun to-pink text-ink"><Ticket size={22} weight="fill" aria-hidden /></span>
+          <span className="min-w-0 flex-1">
+            <span className="block font-bold">{t("recreoTitle")}</span>
+            <span className="block text-sm text-ink-muted">{t("recreoBody")}</span>
+          </span>
+          <button type="button" role="switch" aria-checked={g.recreo_enabled !== false} aria-label={t("recreoTitle")} onClick={() => run(() => setGroupRecreoAction(g.id, g.recreo_enabled === false))} className={cx("relative h-8 w-14 shrink-0 rounded-full transition-colors", g.recreo_enabled !== false ? "bg-mint-700" : "bg-ink/20")}>
+            <span className={cx("absolute top-1 size-6 rounded-full bg-white shadow transition-all", g.recreo_enabled !== false ? "left-7" : "left-1")} />
+          </button>
+        </div>
         <div className="mt-6 border-t border-line pt-5">
           {g.status === "active" ? (
             confirmClose ? (

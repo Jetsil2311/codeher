@@ -125,3 +125,17 @@ export async function changePinAction(_prev: unknown, form: FormData): Promise<{
   const res = await S.changePin(s, current, next);
   return res.ok ? { ok: true } : { error: res.error };
 }
+
+const gameSchema = z.enum(["robotina", "interruptores", "nonogramas", "torres", "flujo"]);
+
+export async function startRecreoAction(game: string) {
+  const s = await requireStudent();
+  const res = await attempt(() => S.recreoStart(s, gameSchema.parse(game)));
+  revalidatePath("/app", "layout");
+  return res;
+}
+
+export async function recreoScoreAction(game: string, score: number) {
+  const s = await requireStudent();
+  return attempt(() => S.recreoScore(s, gameSchema.parse(game), z.number().int().min(0).max(1000).parse(score)));
+}

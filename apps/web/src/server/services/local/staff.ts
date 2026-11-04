@@ -224,6 +224,7 @@ export function groupSummary(db: Db, g: Group) {
     created_at: g.created_at,
     community: db.communities.find((c) => c.id === g.community_id)?.name ?? "",
     community_id: g.community_id,
+    recreo_enabled: g.recreo_enabled !== false,
     students: students.length,
     active_students: students.filter((s) => s.status === "active").length,
     lessons_total: lessonsTotal,
@@ -776,5 +777,13 @@ export function profileFromApiKey(token: string): Profile | null {
     if (!p) return null;
     k.last_used_at = now();
     return p;
+  });
+}
+
+export function setGroupRecreo(p: Profile, groupId: string, enabled: boolean) {
+  return write((db) => {
+    const g = requireGroup(db, p, groupId);
+    g.recreo_enabled = enabled;
+    staffLog(db, p, "recreo_toggled", "group", g.id, { enabled });
   });
 }

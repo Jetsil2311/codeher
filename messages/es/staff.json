@@ -195,7 +195,9 @@
     "closeYes": "Sí, cerrar",
     "cancel": "Cancelar",
     "close": "Cerrar grupo",
-    "reopen": "Reabrir grupo"
+    "reopen": "Reabrir grupo",
+    "recreoTitle": "Recreos con juegos",
+    "recreoBody": "Cada 2 lecciones, las estudiantes ganan un boleto para 5 minutos de juegos de lógica (máximo 2 boletos). Apágalo durante la clase si lo necesitas."
   },
   "student": {
     "lastActivity": "Última actividad: {when}",
@@ -549,5 +551,6 @@
       "system": "Sistema",
       "mcp": "Claude"
     }
-  }
+  },
+  "groupDetail": {}
 }

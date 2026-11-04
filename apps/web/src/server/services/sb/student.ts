@@ -79,3 +79,7 @@ export const nominateProject = async (s: Student, id: string, title: string, blu
   call<string>("student_nominate_project", { p_token: tok(s), p_project: id, p_title: title, p_blurb: blurb });
 export const updateProfile = async (s: Student, nickname: string, avatar: string) => call<R<typeof L.updateProfile>>("student_update_profile", { p_token: tok(s), p_nickname: nickname, p_avatar: avatar });
 export const changePin = async (s: Student, current: string, next: string) => call<R<typeof L.changePin>>("student_change_pin", { p_token: tok(s), p_current: current, p_new: next });
+
+export const recreo = async (s: Student) => call<R<typeof L.recreo>>("student_recreo", { p_token: tok(s) });
+export const recreoStart = async (s: Student, game: string) => call<R<typeof L.recreoStart>>("student_recreo_start", { p_token: tok(s), p_game: game });
+export const recreoScore = async (s: Student, game: string, score: number) => call<R<typeof L.recreoScore>>("student_recreo_score", { p_token: tok(s), p_game: game, p_score: score });

@@ -342,3 +342,5 @@ export async function profileFromApiKey(token: string): Promise<Profile | null> 
   await a.from("api_keys").update({ last_used_at: new Date().toISOString() }).eq("id", k.id);
   return { ...(p as Omit<Profile, "password_hash">), password_hash: "" };
 }
+
+export const setGroupRecreo = async (_p: Profile, groupId: string, enabled: boolean) => call<void>("staff_set_group_recreo", { p_group: groupId, p_enabled: enabled });

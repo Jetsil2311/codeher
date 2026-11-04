@@ -2,7 +2,7 @@ import "server-only";
 import { isTrivialPin, normalizeCode, type CodeLanguage } from "@codeher/core";
 import { hashSecret, verifySecret } from "../../crypto";
 import { now, read, write, nextSeq } from "../../db/store";
-import type { Db, Student } from "../../db/types";
+import { GAMES, type Db, type GameId, type RecreoSession, type Student } from "../../db/types";
 import { AppError } from "../../errors";
 import { applyAttempt, canRead, courseOrder, gradeAnswer, isUnlocked, lessonPayload, lessonStatus, nextInCourse, nextLesson, previousLesson, totals, tryCompleteLesson, touchStreak } from "../../learning";
 import { issueSession } from "../../session";
@@ -307,5 +307,70 @@ export function changePin(s: Student, current: string, next: string): { ok: bool
     st.pin_hash = hashSecret(next);
     log(db, "student", st.id, "student_changed_pin", "student", st.id);
     return { ok: true };
+  });
+}
+
+// ---------- Recreo (port of 0008_recreo.sql) ----------
+export const RECREO = { maxTickets: 2, lessonsPerTicket: 2, minutes: 5 } as const;
+
+function recreoSync(db: Db, s: Student) {
+  db.recreo ??= [];
+  let r = db.recreo.find((x) => x.student_id === s.id);
+  if (!r) db.recreo.push((r = { student_id: s.id, tickets: 0, lessons_credited: 0 }));
+  const done = db.lesson_progress.filter((p) => p.student_id === s.id && p.status === "completed").length;
+  const add = Math.max(0, Math.floor((done - r.lessons_credited) / RECREO.lessonsPerTicket));
+  if (add) {
+    r.tickets = Math.min(RECREO.maxTickets, r.tickets + add);
+    r.lessons_credited += add * RECREO.lessonsPerTicket;
+  }
+  return { r, done };
+}
+
+export function recreo(s: Student) {
+  return write((db) => {
+    const { r, done } = recreoSync(db, s);
+    const active = (db.recreo_sessions ?? []).filter((x) => x.student_id === s.id && Date.parse(x.ends_at) > Date.now()).sort((a, b) => b.ends_at.localeCompare(a.ends_at))[0];
+    return {
+      enabled: db.groups.find((g) => g.id === s.group_id)?.recreo_enabled !== false,
+      tickets: r.tickets, max_tickets: RECREO.maxTickets, lessons_per_ticket: RECREO.lessonsPerTicket, minutes: RECREO.minutes,
+      toward_next: Math.min(1, Math.max(0, done - r.lessons_credited)),
+      active: active ? { game: active.game, ends_at: active.ends_at, score: active.score } : null,
+      best: Object.fromEntries((db.game_scores ?? []).filter((g) => g.student_id === s.id).map((g) => [g.game, g.best])) as Partial<Record<GameId, number>>,
+    };
+  });
+}
+
+export function recreoStart(s: Student, game: GameId) {
+  return write((db) => {
+    if (db.groups.find((g) => g.id === s.group_id)?.recreo_enabled === false) throw new AppError("recreo_disabled");
+    if (!(GAMES as readonly string[]).includes(game)) throw new AppError("invalid_game");
+    const { r } = recreoSync(db, s);
+    db.recreo_sessions ??= [];
+    const active = db.recreo_sessions.find((x) => x.student_id === s.id && Date.parse(x.ends_at) > Date.now());
+    if (active) {
+      active.game = game;
+      return { game, ends_at: active.ends_at, score: active.score, new: false };
+    }
+    if (r.tickets < 1) throw new AppError("no_tickets");
+    r.tickets -= 1;
+    const x: RecreoSession = { id: crypto.randomUUID(), student_id: s.id, game, started_at: now(), ends_at: new Date(Date.now() + RECREO.minutes * 60_000).toISOString(), score: 0 };
+    db.recreo_sessions.push(x);
+    log(db, "student", s.id, "recreo_started", "student", s.id, { game });
+    return { game, ends_at: x.ends_at, score: 0, new: true };
+  });
+}
+
+export function recreoScore(s: Student, game: GameId, score: number) {
+  return write((db) => {
+    const a = (db.recreo_sessions ?? []).find((x) => x.student_id === s.id && x.game === game && Date.parse(x.ends_at) > Date.now() - 60_000);
+    if (!a) throw new AppError("no_active_recreo");
+    const v = Math.max(0, Math.min(1000, Math.floor(score || 0)));
+    a.score = Math.max(a.score, v);
+    db.game_scores ??= [];
+    let g = db.game_scores.find((x) => x.student_id === s.id && x.game === game);
+    if (!g) db.game_scores.push((g = { student_id: s.id, game, best: 0, plays: 0 }));
+    g.best = Math.max(g.best, v);
+    g.plays += 1;
+    return { best: g.best };
   });
 }

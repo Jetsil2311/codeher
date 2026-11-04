@@ -39,5 +39,9 @@
   "pin_format": "El PIN debe tener 4 números.",
   "unexpected": "Algo salió mal. Inténtalo de nuevo.",
   "email_not_confirmed": "Confirma tu correo primero: te enviamos un enlace al crear tu cuenta.",
-  "auth_failed": "No pudimos completar el acceso con Google. Intenta de nuevo."
+  "auth_failed": "No pudimos completar el acceso con Google. Intenta de nuevo.",
+  "no_tickets": "Todavía no tienes boletos de recreo. Completa 2 lecciones para ganar uno.",
+  "recreo_disabled": "Los recreos están pausados para tu grupo.",
+  "invalid_game": "Ese juego no existe.",
+  "no_active_recreo": "Tu recreo ya terminó."
 }

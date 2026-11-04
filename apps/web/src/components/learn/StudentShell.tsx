@@ -6,7 +6,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { LayoutGroup, motion, useReducedMotion } from "motion/react";
 import { useState, type ReactNode } from "react";
-import { Fire, Flask, FolderSimple, House, Path, SignOut, Star, UserCircle, CaretRight } from "@phosphor-icons/react/dist/ssr";
+import { Fire, Flask, FolderSimple, House, Path, SignOut, Star, UserCircle, CaretRight, Ticket } from "@phosphor-icons/react/dist/ssr";
 import { Wordmark } from "@/components/brand/Wordmark";
 import { Avatar, cx } from "@/components/ui";
 import { Ring } from "@/components/motion/Motion";
@@ -14,13 +14,13 @@ import { Sheet } from "@/components/motion/Sheet";
 import { spring } from "@/components/motion/Segmented";
 import { signOutAction } from "@/app/actions/student";
 
-const ICONS = { home: House, path: Path, lab: Flask, projects: FolderSimple, profile: UserCircle };
+const ICONS = { home: House, path: Path, lab: Flask, projects: FolderSimple, profile: UserCircle, recreo: Ticket };
 type Key = keyof typeof ICONS;
 
 export interface StudentShellProps {
-  links: { href: string; key: Key; label: string; short: string; exact?: boolean }[];
-  me: { nickname: string; avatar: string; xp: number; level: number; progress: number; toNext: number; streak: number; community: string };
-  labels: { nav: string; signOut: string; level: string; streak: string; xpToNext: string; account: string; days: string; close: string };
+  links: { href: string; key: Key; label: string; short: string; exact?: boolean; dock?: boolean }[];
+  me: { nickname: string; avatar: string; xp: number; level: number; progress: number; toNext: number; streak: number; community: string; tickets: number; recreoOn: boolean };
+  labels: { nav: string; signOut: string; level: string; streak: string; xpToNext: string; account: string; days: string; close: string; tickets: string };
   children: ReactNode;
 }
 
@@ -30,6 +30,7 @@ export function StudentShell({ links, me, labels, children }: StudentShellProps)
   const [menu, setMenu] = useState(false);
   const active = (href: string, exact?: boolean) => (exact ? path === href : path === href || path.startsWith(`${href}/`) || (href === "/app/ruta" && path.startsWith("/app/leccion")));
   const focus = path.startsWith("/app/laboratorio") || path.startsWith("/app/leccion");
+  const playing = /^\/app\/recreo\/.+/.test(path);
 
   return (
     <div className="lg:grid lg:min-h-dvh lg:grid-cols-[17.5rem_1fr]">
@@ -79,7 +80,11 @@ export function StudentShell({ links, me, labels, children }: StudentShellProps)
                     <Icon size={19} weight={on ? "fill" : "bold"} aria-hidden />
                   </span>
                   {l.label}
-                  {on && <CaretRight size={14} weight="bold" className="ml-auto mr-1 text-violet-700" aria-hidden />}
+                  {l.key === "recreo" && me.recreoOn && me.tickets > 0 ? (
+                    <span className="ml-auto mr-1 inline-flex h-6 min-w-6 items-center justify-center rounded-full bg-gradient-to-br from-sun to-pink px-1.5 text-xs font-extrabold text-ink" aria-label={`${me.tickets} ${labels.tickets}`}>{me.tickets}</span>
+                  ) : on ? (
+                    <CaretRight size={14} weight="bold" className="ml-auto mr-1 text-violet-700" aria-hidden />
+                  ) : null}
                 </Link>
               );
             })}
@@ -105,10 +110,12 @@ export function StudentShell({ links, me, labels, children }: StudentShellProps)
               <span className="tabular-nums">{me.streak}</span>
               <span className="sr-only">{labels.days}</span>
             </span>
-            <span className="inline-flex h-9 items-center gap-1.5 rounded-full bg-white px-3 text-sm font-bold text-sun-700 ring-1 ring-ink/[0.06]">
-              <Star size={16} weight="fill" className="text-[#e0b800]" aria-hidden /> <span className="tabular-nums">{me.xp}</span>
-              <span className="sr-only">XP</span>
-            </span>
+            {me.recreoOn && (
+              <Link href="/app/recreo" className={cx("relative inline-flex h-9 items-center gap-1.5 rounded-full px-3 text-sm font-bold ring-1 transition active:scale-95", me.tickets > 0 ? "bg-gradient-to-br from-[#fff3b0] to-pink-100 text-ink ring-pink/30" : "bg-white text-ink-soft ring-ink/[0.06]")} aria-label={`${labels.tickets}: ${me.tickets}`}>
+                <Ticket size={17} weight={me.tickets > 0 ? "fill" : "bold"} className={me.tickets > 0 ? "text-pink-700" : ""} aria-hidden /> <span className="tabular-nums">{me.tickets}</span>
+                {me.tickets > 0 && <span className="absolute -right-0.5 -top-0.5 size-2.5 rounded-full bg-pink ring-2 ring-paper motion-safe:animate-pulse" aria-hidden />}
+              </Link>
+            )}
             <button type="button" onClick={() => setMenu(true)} aria-label={labels.account} className="rounded-[0.9rem] transition active:scale-90">
               <Ring value={me.progress} size={40} stroke={3}>
                 <Avatar id={me.avatar} size={30} className="rounded-[0.6rem]" />
@@ -118,13 +125,13 @@ export function StudentShell({ links, me, labels, children }: StudentShellProps)
         </div>
       </header>
 
-      <main id="contenido" className={cx("min-w-0", focus ? "pb-28 lg:pb-8" : "pb-32 lg:pb-12")}>{children}</main>
+      <main id="contenido" className={cx("min-w-0", playing ? "pb-4" : focus ? "pb-28 lg:pb-8" : "pb-32 lg:pb-12")}>{children}</main>
 
       {/* ---------- Floating dock ---------- */}
       <LayoutGroup id="student-dock">
-        <nav aria-label={labels.nav} className="fixed inset-x-0 bottom-0 z-40 px-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] lg:hidden">
+        <nav aria-label={labels.nav} className={cx("fixed inset-x-0 bottom-0 z-40 px-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] lg:hidden", playing && "hidden")}>
           <div className="mx-auto flex max-w-md items-center justify-between gap-1 rounded-[1.6rem] bg-midnight/[0.94] p-1.5 shadow-[0_18px_40px_-12px_rgb(27_16_48/0.6)] ring-1 ring-white/10 backdrop-blur-xl">
-            {links.map((l) => {
+            {links.filter((l) => l.dock !== false).map((l) => {
               const Icon = ICONS[l.key];
               const on = active(l.href, l.exact);
               return (

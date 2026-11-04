@@ -329,3 +329,10 @@ export async function revokeApiKeyAction(id: string) {
   revalidatePath("/equipo/claves");
   return res;
 }
+
+export async function setGroupRecreoAction(groupId: string, enabled: boolean) {
+  const p = await requireStaff();
+  const res = await attempt(() => T.setGroupRecreo(p, z.string().uuid().parse(groupId), enabled));
+  revalidatePath(`/equipo/grupos/${groupId}`);
+  return res;
+}
