@@ -30,12 +30,16 @@ export function Sheet({
   const [mounted, setMounted] = useState(false);
   const panel = useRef<HTMLDivElement>(null);
   const returnTo = useRef<Element | null>(null);
+  // Callers often pass an inline onClose; keep it in a ref so the focus/scroll effect
+  // only runs when the sheet opens or closes (not on every keystroke inside it).
+  const close = useRef(onClose);
+  close.current = onClose;
   useEffect(() => setMounted(true), []);
   useEffect(() => {
     if (!open) return;
     returnTo.current = document.activeElement;
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") onClose();
+      if (e.key === "Escape") close.current();
       if (e.key === "Tab" && panel.current) {
         const f = panel.current.querySelectorAll<HTMLElement>('a[href],button:not([disabled]),input,select,textarea,[tabindex]:not([tabindex="-1"])');
         if (!f.length) return;
@@ -54,7 +58,7 @@ export function Sheet({
       document.body.style.overflow = prev;
       (returnTo.current as HTMLElement | null)?.focus?.();
     };
-  }, [open, onClose]);
+  }, [open]);
 
   if (!mounted) return null;
   const bottom = side === "bottom";

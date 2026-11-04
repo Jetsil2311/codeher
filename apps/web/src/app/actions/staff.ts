@@ -343,3 +343,103 @@ export async function recreoFreeAction(studentIds: string[], minutes: number, pa
   if (path) revalidatePath(path);
   return res;
 }
+
+// ---------- Courses and modules ----------
+const statusSchema = z.enum(["draft", "review", "published", "archived"]);
+const uuid = z.string().uuid();
+const refreshCourses = (courseId?: string) => {
+  revalidatePath("/equipo", "layout");
+  if (courseId) revalidatePath(`/equipo/cursos/${courseId}`);
+};
+
+export async function saveCourseAction(input: { id?: string; slug: string; title: string; description: string; firstModule?: string }) {
+  const p = await requireStaff();
+  const data = z.object({ id: uuid.optional(), slug: z.string().trim().max(60), title: z.string().trim().max(120), description: z.string().max(600), firstModule: z.string().max(120).optional() }).parse(input);
+  const res = await attempt(() => T.saveCourse(p, data));
+  refreshCourses(data.id);
+  if (res.ok && !data.id) redirect(`/equipo/cursos/${res.data}`);
+  return res;
+}
+
+export async function setCourseStatusAction(id: string, status: "draft" | "review" | "published" | "archived") {
+  const p = await requireStaff();
+  const res = await attempt(() => T.setCourseStatus(p, uuid.parse(id), statusSchema.parse(status)));
+  revalidatePath("/", "layout");
+  return res;
+}
+
+export async function setModuleStatusAction(courseId: string, id: string, status: "draft" | "review" | "published" | "archived") {
+  const p = await requireStaff();
+  const res = await attempt(() => T.setModuleStatus(p, uuid.parse(id), statusSchema.parse(status)));
+  revalidatePath("/", "layout");
+  refreshCourses(courseId);
+  return res;
+}
+
+export async function deleteCourseAction(id: string, confirm: string, deleteLessons: boolean) {
+  const p = await requireStaff();
+  const res = await attempt(() => T.deleteCourse(p, uuid.parse(id), confirm, !!deleteLessons));
+  revalidatePath("/", "layout");
+  if (res.ok) redirect("/equipo/cursos");
+  return res;
+}
+
+export async function saveModuleAction(courseId: string, input: { id?: string; title: string }) {
+  const p = await requireStaff();
+  const res = await attempt(() => T.saveModule(p, { id: input.id ? uuid.parse(input.id) : undefined, courseId: uuid.parse(courseId), title: z.string().max(120).parse(input.title) }));
+  refreshCourses(courseId);
+  return res;
+}
+
+export async function deleteModuleAction(courseId: string, id: string, deleteLessons: boolean) {
+  const p = await requireStaff();
+  const res = await attempt(() => T.deleteModule(p, uuid.parse(id), !!deleteLessons));
+  revalidatePath("/", "layout");
+  refreshCourses(courseId);
+  return res;
+}
+
+export async function reorderModulesAction(courseId: string, ids: string[]) {
+  const p = await requireStaff();
+  const res = await attempt(() => T.reorderModules(p, uuid.parse(courseId), z.array(uuid).max(200).parse(ids)));
+  revalidatePath("/", "layout");
+  return res;
+}
+
+export async function reorderLessonsAction(courseId: string, moduleId: string, ids: string[]) {
+  const p = await requireStaff();
+  const res = await attempt(() => T.reorderLessons(p, uuid.parse(moduleId), z.array(uuid).max(500).parse(ids)));
+  revalidatePath("/", "layout");
+  refreshCourses(courseId);
+  return res;
+}
+
+export async function moveLessonAction(courseId: string, lessonId: string, moduleId: string | null) {
+  const p = await requireStaff();
+  const res = await attempt(() => T.moveLesson(p, uuid.parse(lessonId), moduleId ? uuid.parse(moduleId) : null));
+  revalidatePath("/", "layout");
+  refreshCourses(courseId);
+  return res;
+}
+
+/** Quick lesson from the course builder: stays on the course page (no redirect). */
+export async function createCourseLessonAction(courseId: string, moduleId: string, title: string, language: "python" | "pseudocode_es") {
+  const p = await requireStaff();
+  const name = z.string().trim().min(1).max(160).parse(title);
+  const base = T.slugify(name) || "leccion";
+  let res = await attempt(() => T.createLesson(p, { title: name, slug: base, language: z.enum(["python", "pseudocode_es"]).parse(language), visibility: "program", module_id: uuid.parse(moduleId) }));
+  for (let i = 2; !res.ok && res.error === "already_exists" && i < 12; i++) {
+    const slug = `${base.slice(0, 55)}-${i}`;
+    res = await attempt(() => T.createLesson(p, { title: name, slug, language, visibility: "program", module_id: moduleId }));
+  }
+  refreshCourses(courseId);
+  return res;
+}
+
+export async function deleteLessonAction(id: string, confirm: string, back?: string) {
+  const p = await requireStaff();
+  const res = await attempt(() => T.deleteLesson(p, uuid.parse(id), confirm));
+  revalidatePath("/", "layout");
+  if (res.ok) redirect(back && /^\/equipo\/[a-z0-9/-]+$/.test(back) ? back : "/equipo/lecciones");
+  return res;
+}

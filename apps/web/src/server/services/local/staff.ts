@@ -632,7 +632,9 @@ export function updateLesson(p: Profile, id: string, patch: Partial<Pick<Lesson,
     if (expectedVersion !== undefined && expectedVersion !== l.version) throw new AppError("version_conflict");
     if (patch.language && patch.language !== l.language && db.exercises.some((e) => e.lesson_id === l.id && e.solution.validated_fingerprint)) throw new AppError("language_locked");
     if ((patch.visibility ?? l.visibility) === "public" && l.status === "published" && p.role !== "founder") throw new AppError("founder_publishes_public");
-    Object.assign(l, patch);
+    if (patch.module_id !== undefined && patch.module_id !== l.module_id) moveLessonIn(db, p, l.id, patch.module_id);
+    const { module_id: _m, ...rest } = patch;
+    Object.assign(l, rest);
     l.version += 1;
     l.updated_at = now();
     contentLog(db, p, "update", "lesson", id, { fields: Object.keys(patch) });
@@ -823,5 +825,266 @@ export function groupRecreo(p: Profile, groupId: string) {
           lessons_total: lessonIds.size,
         };
       });
+  });
+}
+
+// ---------- Course authoring (mirrors 0010_course_authoring.sql) ----------
+const SLUG = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
+export function slugify(s: string) {
+  return s.toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "").replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "").slice(0, 60);
+}
+export function canEditCourse(p: Profile, c: { created_by: string | null }) {
+  return p.role === "founder" || c.created_by === p.id;
+}
+function lessonHasProgress(db: Db, lessonId: string) {
+  const ex = new Set(db.exercises.filter((e) => e.lesson_id === lessonId).map((e) => e.id));
+  return db.lesson_progress.some((x) => x.lesson_id === lessonId) || db.exercise_progress.some((x) => ex.has(x.exercise_id));
+}
+function renumberLessons(db: Db, moduleId: string) {
+  db.lessons.filter((l) => l.module_id === moduleId).sort((a, b) => a.position - b.position).forEach((l, i) => (l.position = i + 1));
+}
+function renumberModules(db: Db, courseId: string) {
+  db.modules.filter((m) => m.course_id === courseId).sort((a, b) => a.position - b.position).forEach((m, i) => (m.position = i + 1));
+}
+function purgeLesson(db: Db, id: string) {
+  const ex = new Set(db.exercises.filter((e) => e.lesson_id === id).map((e) => e.id));
+  db.lessons = db.lessons.filter((l) => l.id !== id);
+  db.exercises = db.exercises.filter((e) => e.lesson_id !== id);
+  db.decks = db.decks.filter((d) => d.lesson_id !== id);
+  db.lesson_progress = db.lesson_progress.filter((x) => x.lesson_id !== id);
+  db.exercise_progress = db.exercise_progress.filter((x) => !ex.has(x.exercise_id));
+  db.attempts = db.attempts.filter((x) => !ex.has(x.exercise_id));
+  for (const l of db.lessons) if (l.pair_lesson_id === id) l.pair_lesson_id = null;
+  for (const pr of db.projects) if (pr.source_lesson_id === id) pr.source_lesson_id = null;
+}
+function releaseLessons(db: Db, p: Profile, moduleId: string, del: boolean) {
+  let deleted = 0;
+  let detached = 0;
+  for (const l of db.lessons.filter((x) => x.module_id === moduleId)) {
+    if (del && canEditLesson(p, l) && (p.role === "founder" || !lessonHasProgress(db, l.id))) {
+      purgeLesson(db, l.id);
+      contentLog(db, p, "delete", "lesson", l.id);
+      deleted++;
+    } else {
+      if (l.visibility === "program") Object.assign(l, { visibility: "draft", status: "draft" });
+      l.module_id = null;
+      contentLog(db, p, "detach", "lesson", l.id, { module_id: moduleId });
+      detached++;
+    }
+  }
+  return { deleted, detached };
+}
+function courseOf(db: Db, id: string) {
+  const c = db.courses.find((x) => x.id === id);
+  if (!c) throw new AppError("not_found");
+  return c;
+}
+
+export function courseList(p: Profile) {
+  return read((db) =>
+    db.courses
+      .filter((c) => p.role === "founder" || c.status === "published" || c.created_by === p.id)
+      .sort((a, b) => a.position - b.position)
+      .map((c) => {
+        const mods = db.modules.filter((m) => m.course_id === c.id);
+        const lessons = db.lessons.filter((l) => mods.some((m) => m.id === l.module_id));
+        return {
+          id: c.id, slug: c.slug, title: c.title, description: c.description, status: c.status, editable: canEditCourse(p, c),
+          modules: mods.length, lessons: lessons.length, published: courseOrder(db, c.id).length,
+          languages: [...new Set(lessons.map((l) => l.language))],
+          groups: db.group_courses.filter((g) => g.course_id === c.id).length,
+        };
+      }),
+  );
+}
+export type CourseCard = ReturnType<typeof courseList>[number];
+
+export function courseDetail(p: Profile, id: string) {
+  return read((db) => {
+    const c = db.courses.find((x) => x.id === id);
+    if (!c || !(p.role === "founder" || c.status === "published" || c.created_by === p.id)) return null;
+    const editable = canEditCourse(p, c);
+    const visible = (l: Lesson) => p.role === "founder" || l.status === "published" || l.created_by === p.id;
+    const mods = db.modules.filter((m) => m.course_id === c.id).sort((a, b) => a.position - b.position);
+    const lessonIds = new Set(mods.flatMap((m) => db.lessons.filter((l) => l.module_id === m.id).map((l) => l.id)));
+    return {
+      course: { id: c.id, slug: c.slug, title: c.title, description: c.description, status: c.status, created_by: c.created_by },
+      editable,
+      usage: {
+        groups: db.group_courses.filter((g) => g.course_id === c.id).length,
+        students: new Set(db.lesson_progress.filter((x) => lessonIds.has(x.lesson_id)).map((x) => x.student_id)).size,
+      },
+      studentLessons: courseOrder(db, c.id).length,
+      modules: mods.map((m) => ({
+        id: m.id, slug: m.slug, title: m.title, status: m.status, position: m.position,
+        lessons: db.lessons
+          .filter((l) => l.module_id === m.id && visible(l))
+          .sort((a, b) => a.position - b.position)
+          .map((l) => ({ id: l.id, slug: l.slug, title: l.title, language: l.language, visibility: l.visibility, status: l.status, exercises: db.exercises.filter((e) => e.lesson_id === l.id).length, editable: canEditLesson(p, l) })),
+      })),
+      unassigned: db.lessons
+        .filter((l) => !l.module_id && canEditLesson(p, l))
+        .map((l) => ({ id: l.id, slug: l.slug, title: l.title, language: l.language, visibility: l.visibility, status: l.status })),
+    };
+  });
+}
+export type CourseDetail = NonNullable<ReturnType<typeof courseDetail>>;
+
+export function saveCourse(p: Profile, input: { id?: string; slug: string; title: string; description: string; firstModule?: string }) {
+  return write((db) => {
+    const title = input.title.trim().slice(0, 120);
+    if (!title) throw new AppError("invalid_name");
+    if (!SLUG.test(input.slug) || input.slug.length > 60) throw new AppError("invalid_slug");
+    if (db.courses.some((c) => c.slug === input.slug && c.id !== input.id)) throw new AppError("already_exists");
+    if (!input.id) {
+      const id = crypto.randomUUID();
+      const mod = (input.firstModule ?? "").trim().slice(0, 120) || "Módulo 1";
+      db.courses.push({ id, slug: input.slug, title, description: input.description.slice(0, 600), status: "draft", position: Math.max(0, ...db.courses.map((c) => c.position)) + 1, created_by: p.id });
+      db.modules.push({ id: crypto.randomUUID(), course_id: id, slug: slugify(mod) || "modulo-1", title: mod, position: 1, status: "draft" });
+      contentLog(db, p, "create", "course", id, { slug: input.slug });
+      return id;
+    }
+    const c = courseOf(db, input.id);
+    if (!canEditCourse(p, c)) throw new AppError("forbidden");
+    Object.assign(c, { slug: input.slug, title, description: input.description.slice(0, 600) });
+    contentLog(db, p, "update", "course", c.id);
+    return c.id;
+  });
+}
+
+export function setCourseStatus(p: Profile, id: string, status: Lesson["status"]) {
+  return write((db) => {
+    const c = courseOf(db, id);
+    if (!canEditCourse(p, c)) throw new AppError("forbidden");
+    if (status === "published" && !db.modules.some((m) => m.course_id === id && m.status === "published")) throw new AppError("course_needs_module");
+    c.status = status;
+    contentLog(db, p, "set_status", "course", id, { status });
+    if (status === "published") staffLog(db, p, "content_published", "course", id);
+  });
+}
+
+export function setModuleStatus(p: Profile, id: string, status: Lesson["status"]) {
+  return write((db) => {
+    const m = db.modules.find((x) => x.id === id);
+    if (!m) throw new AppError("not_found");
+    if (!canEditCourse(p, courseOf(db, m.course_id))) throw new AppError("forbidden");
+    if (status === "published" && !db.lessons.some((l) => l.module_id === id && l.status === "published")) throw new AppError("module_needs_lesson");
+    m.status = status;
+    contentLog(db, p, "set_status", "module", id, { status });
+  });
+}
+
+export function deleteCourse(p: Profile, id: string, confirm: string, deleteLessons: boolean) {
+  return write((db) => {
+    const c = courseOf(db, id);
+    if (!canEditCourse(p, c)) throw new AppError("forbidden");
+    if (confirm !== c.slug) throw new AppError("confirmation_required");
+    const mods = db.modules.filter((m) => m.course_id === id);
+    if (p.role !== "founder" && db.lessons.some((l) => mods.some((m) => m.id === l.module_id) && db.lesson_progress.some((x) => x.lesson_id === l.id))) throw new AppError("course_in_use");
+    const out = { deleted: 0, detached: 0 };
+    for (const m of mods) {
+      const r = releaseLessons(db, p, m.id, deleteLessons);
+      out.deleted += r.deleted;
+      out.detached += r.detached;
+    }
+    db.modules = db.modules.filter((m) => m.course_id !== id);
+    db.group_courses = db.group_courses.filter((g) => g.course_id !== id);
+    db.courses = db.courses.filter((x) => x.id !== id);
+    contentLog(db, p, "delete", "course", id, { slug: c.slug, ...out });
+    staffLog(db, p, "course_deleted", "course", id, { slug: c.slug });
+    return out;
+  });
+}
+
+export function saveModule(p: Profile, input: { id?: string; courseId: string; title: string }) {
+  return write((db) => {
+    const title = input.title.trim().slice(0, 120);
+    if (!title) throw new AppError("invalid_name");
+    const existing = input.id ? db.modules.find((m) => m.id === input.id) : undefined;
+    if (input.id && !existing) throw new AppError("not_found");
+    const c = courseOf(db, existing?.course_id ?? input.courseId);
+    if (!canEditCourse(p, c)) throw new AppError("forbidden");
+    if (existing) {
+      existing.title = title;
+      contentLog(db, p, "update", "module", existing.id);
+      return existing.id;
+    }
+    const base = slugify(title) || "modulo";
+    let slug = base;
+    for (let i = 2; db.modules.some((m) => m.course_id === c.id && m.slug === slug); i++) slug = `${base}-${i}`;
+    const id = crypto.randomUUID();
+    db.modules.push({ id, course_id: c.id, slug, title, position: Math.max(0, ...db.modules.filter((m) => m.course_id === c.id).map((m) => m.position)) + 1, status: "draft" });
+    contentLog(db, p, "create", "module", id, { course_id: c.id });
+    return id;
+  });
+}
+
+export function deleteModule(p: Profile, id: string, deleteLessons: boolean) {
+  return write((db) => {
+    const m = db.modules.find((x) => x.id === id);
+    if (!m) throw new AppError("not_found");
+    if (!canEditCourse(p, courseOf(db, m.course_id))) throw new AppError("forbidden");
+    if (p.role !== "founder" && deleteLessons && db.lessons.some((l) => l.module_id === id && lessonHasProgress(db, l.id))) throw new AppError("module_in_use");
+    const out = releaseLessons(db, p, id, deleteLessons);
+    db.modules = db.modules.filter((x) => x.id !== id);
+    renumberModules(db, m.course_id);
+    contentLog(db, p, "delete", "module", id, out);
+    return out;
+  });
+}
+
+export function reorderModules(p: Profile, courseId: string, ids: string[]) {
+  return write((db) => {
+    if (!canEditCourse(p, courseOf(db, courseId))) throw new AppError("forbidden");
+    const mine = db.modules.filter((m) => m.course_id === courseId);
+    if (mine.length !== ids.length || new Set(ids).size !== ids.length || !mine.every((m) => ids.includes(m.id))) throw new AppError("ids_mismatch");
+    ids.forEach((id, i) => (mine.find((m) => m.id === id)!.position = i + 1));
+  });
+}
+
+export function reorderLessons(p: Profile, moduleId: string, ids: string[]) {
+  return write((db) => {
+    const m = db.modules.find((x) => x.id === moduleId);
+    if (!m) throw new AppError("not_found");
+    if (!canEditCourse(p, courseOf(db, m.course_id))) throw new AppError("forbidden");
+    const mine = db.lessons.filter((l) => l.module_id === moduleId);
+    if (mine.length !== ids.length || new Set(ids).size !== ids.length || !mine.every((l) => ids.includes(l.id))) throw new AppError("ids_mismatch");
+    ids.forEach((id, i) => (mine.find((l) => l.id === id)!.position = i + 1));
+  });
+}
+
+function moveLessonIn(db: Db, p: Profile, lessonId: string, moduleId: string | null) {
+  const l = db.lessons.find((x) => x.id === lessonId);
+  if (!l) throw new AppError("not_found");
+  if (l.module_id === moduleId) return;
+  const from = l.module_id ? db.modules.find((m) => m.id === l.module_id) : undefined;
+  const to = moduleId ? db.modules.find((m) => m.id === moduleId) : undefined;
+  if (moduleId && !to) throw new AppError("not_found");
+  const owns = (m?: { course_id: string }) => !m || canEditCourse(p, courseOf(db, m.course_id));
+  if (!(canEditLesson(p, l) || (owns(from) && owns(to)))) throw new AppError("forbidden");
+  const prev = l.module_id;
+  l.module_id = moduleId;
+  l.position = Math.max(0, ...db.lessons.filter((x) => x.id !== l.id && x.module_id === moduleId).map((x) => x.position)) + 1;
+  if (!moduleId && l.visibility === "program") l.visibility = "draft";
+  else if (moduleId && l.visibility === "draft") l.visibility = "program";
+  if (prev) renumberLessons(db, prev);
+  contentLog(db, p, "move", "lesson", l.id, { from: prev, to: moduleId });
+}
+
+export function moveLesson(p: Profile, lessonId: string, moduleId: string | null) {
+  return write((db) => moveLessonIn(db, p, lessonId, moduleId));
+}
+
+export function deleteLesson(p: Profile, id: string, confirm: string) {
+  return write((db) => {
+    const l = db.lessons.find((x) => x.id === id);
+    if (!l) throw new AppError("not_found");
+    if (!canEditLesson(p, l)) throw new AppError("forbidden");
+    if (confirm !== l.slug) throw new AppError("confirmation_required");
+    if (p.role !== "founder" && lessonHasProgress(db, id)) throw new AppError("lesson_in_use");
+    purgeLesson(db, id);
+    if (l.module_id) renumberLessons(db, l.module_id);
+    contentLog(db, p, "delete", "lesson", id, { slug: l.slug, title: l.title });
+    staffLog(db, p, "lesson_deleted", "lesson", id, { slug: l.slug });
   });
 }

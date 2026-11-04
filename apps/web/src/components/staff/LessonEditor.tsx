@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { ArrowDown, ArrowUp, CheckCircle, Copy, Eye, FloppyDisk, PencilSimple, Plus, PresentationChart, Trash, Warning, XCircle } from "@phosphor-icons/react/dist/ssr";
 import { ChalkboardTeacher } from "@phosphor-icons/react/dist/ssr";
+import { Sheet } from "@/components/motion/Sheet";
 import { checkPublishable, PYTHON_CONSTRUCTS, testSchema, validationFingerprint, type CodeLanguage, type Test } from "@codeher/core";
 import { parses } from "@codeher/grader/pseudo";
 import { CodeEditor } from "@/components/code/CodeEditor";
@@ -13,7 +14,7 @@ import { gradeWith } from "@/components/code/engines";
 import { Markdown } from "@/components/code/Markdown";
 import { Playground } from "@/components/code/Playground";
 import { SlideViewer } from "@/components/learn/SlideViewer";
-import { deleteExerciseAction, duplicateLessonAction, reorderExercisesAction, saveDeckAction, saveExerciseAction, setLessonStatusAction, updateLessonAction } from "@/app/actions/staff";
+import { deleteExerciseAction, deleteLessonAction, duplicateLessonAction, reorderExercisesAction, saveDeckAction, saveExerciseAction, setLessonStatusAction, updateLessonAction } from "@/app/actions/staff";
 import { Field, LanguageBadge, Tag, inputClass, selectClass, textareaClass, cx } from "@/components/ui";
 import type { Exercise, Lesson, SlideDeck } from "@/server/db/types";
 
@@ -124,6 +125,7 @@ export function LessonEditor({ data, founder, pseudoConstructs }: { data: Data; 
   const [deckJson, setDeckJson] = useState(data.deck ? JSON.stringify(data.deck.slides, null, 2) : JSON.stringify({ schema_version: 1, slides: [{ id: "s1", title: l.title, blocks: [{ type: "text", markdown: "Escribe aquí el contenido." }], notes: "" }] }, null, 2));
   const [showDeck, setShowDeck] = useState(false);
   const [fingerprints, setFingerprints] = useState<Record<string, boolean>>({});
+  const [deleting, setDeleting] = useState(false);
   const ro = !data.editable;
 
   const report = (r: { ok: boolean; error?: string }, okText: string) => {
@@ -232,8 +234,10 @@ export function LessonEditor({ data, founder, pseudoConstructs }: { data: Data; 
           <a href={l.visibility === "public" ? `/probar/${l.slug}` : `/app/leccion/${l.slug}`} target="_blank" rel="noopener noreferrer" className="inline-flex h-10 items-center gap-1.5 rounded-full bg-white px-4 text-sm font-semibold ring-1 ring-ink/12"><Eye size={16} aria-hidden /> {t("viewAsStudent")}</a>
           <Link href={`/equipo/guion/${l.id}`} className="inline-flex h-10 items-center gap-1.5 rounded-full bg-midnight px-4 text-sm font-semibold text-paper"><ChalkboardTeacher size={16} weight="fill" aria-hidden /> {t("script")}</Link>
           <button type="button" onClick={() => start(async () => { await duplicateLessonAction(l.id); })} className="inline-flex h-10 items-center gap-1.5 rounded-full bg-white px-4 text-sm font-semibold ring-1 ring-ink/12"><Copy size={16} aria-hidden /> {t("duplicate")}</button>
+          {!ro && <button type="button" onClick={() => setDeleting(true)} aria-label={t("deleteLesson")} title={t("deleteLesson")} className="inline-flex h-10 items-center gap-1.5 rounded-full bg-white px-3 text-sm font-semibold text-danger ring-1 ring-danger/25 hover:bg-danger/10"><Trash size={16} weight="bold" aria-hidden /><span className="max-sm:hidden">{t("deleteLesson")}</span></button>}
         </span>
       </div>
+      {!ro && <DeleteLesson open={deleting} onClose={() => setDeleting(false)} id={l.id} slug={l.slug} />}
 
       {msg ? <p role="status" className={cx("rounded-2xl px-4 py-3 text-sm font-semibold", msg.ok ? "bg-[#d9fbf5] text-mint-700" : "bg-pink-100 text-ink")}>{msg.text}</p> : null}
 
@@ -396,5 +400,36 @@ export function LessonEditor({ data, founder, pseudoConstructs }: { data: Data; 
         </div>
       )}
     </div>
+  );
+}
+
+function DeleteLesson({ open, onClose, id, slug }: { open: boolean; onClose: () => void; id: string; slug: string }) {
+  const t = useTranslations("staff.editor");
+  const te = useTranslations("errors");
+  const [typed, setTyped] = useState("");
+  const [err, setErr] = useState<string | null>(null);
+  const [busy, start] = useTransition();
+  useEffect(() => { if (open) { setTyped(""); setErr(null); } }, [open]);
+  return (
+    <Sheet open={open} onClose={onClose} title={t("deleteTitle")} closeLabel={t("deleteCancel")}>
+      <form
+        className="space-y-4 pb-2"
+        onSubmit={(e) => {
+          e.preventDefault();
+          start(async () => {
+            const r = await deleteLessonAction(id, typed.trim());
+            if (r && !r.ok) setErr(te(r.error as "unexpected"));
+          });
+        }}
+      >
+        <p className="text-sm text-ink-soft">{t("deleteBody")}</p>
+        <Field label={t("deleteConfirm", { slug })} htmlFor="del-l" error={err}>
+          <input id="del-l" data-autofocus value={typed} onChange={(e) => setTyped(e.target.value)} autoComplete="off" spellCheck={false} className={cx(inputClass, "font-mono")} />
+        </Field>
+        <button type="submit" disabled={busy || typed.trim() !== slug} className="inline-flex h-11 w-full items-center justify-center gap-2 rounded-full bg-danger font-semibold text-white disabled:opacity-40">
+          <Trash size={16} weight="bold" aria-hidden /> {t("deleteLesson")}
+        </button>
+      </form>
+    </Sheet>
   );
 }

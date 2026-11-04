@@ -4,7 +4,7 @@ import { pick } from "./pick";
 import * as L from "./local/staff";
 import * as R from "./sb/staff";
 
-export { previewCodes, canEditLesson, type GroupSummary, type GroupDetail, type StudentDetail } from "./local/staff";
+export { previewCodes, canEditLesson, slugify, type CourseCard, type CourseDetail, type GroupSummary, type GroupDetail, type StudentDetail } from "./local/staff";
 export { googleSignInUrl, staffSignOut as sbStaffSignOut, currentProfile as sbCurrentProfile } from "./sb/staff";
 
 export const staffSignIn = pick(L.staffSignIn, R.staffSignIn);
@@ -62,3 +62,15 @@ export const profileFromApiKey = pick(L.profileFromApiKey, R.profileFromApiKey);
 export const setGroupRecreo = pick(L.setGroupRecreo, R.setGroupRecreo);
 export const recreoFree = pick(L.recreoFree, R.recreoFree);
 export const groupRecreo = pick(L.groupRecreo, R.groupRecreo);
+export const courseList = pick(L.courseList, R.courseList);
+export const courseDetail = pick(L.courseDetail, R.courseDetail);
+export const saveCourse = pick(L.saveCourse, R.saveCourse);
+export const setCourseStatus = pick(L.setCourseStatus, R.setCourseStatus);
+export const setModuleStatus = pick(L.setModuleStatus, R.setModuleStatus);
+export const deleteCourse = pick(L.deleteCourse, R.deleteCourse);
+export const saveModule = pick(L.saveModule, R.saveModule);
+export const deleteModule = pick(L.deleteModule, R.deleteModule);
+export const reorderModules = pick(L.reorderModules, R.reorderModules);
+export const reorderLessons = pick(L.reorderLessons, R.reorderLessons);
+export const moveLesson = pick(L.moveLesson, R.moveLesson);
+export const deleteLesson = pick(L.deleteLesson, R.deleteLesson);

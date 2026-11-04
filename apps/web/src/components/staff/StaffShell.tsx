@@ -22,7 +22,7 @@ export function StaffShell({ sections, dock, user, labels, children }: { section
   const reduce = useReducedMotion();
   const [drawer, setDrawer] = useState(false);
   const all = sections.flatMap((s) => s.links);
-  const alias = path.startsWith("/equipo/estudiantes") || path.startsWith("/equipo/proyectos") ? "/equipo/grupos" : path;
+  const alias = path.startsWith("/equipo/estudiantes") || path.startsWith("/equipo/proyectos") ? "/equipo/grupos" : path.startsWith("/equipo/cursos") ? "/equipo/lecciones" : path;
   const isOn = (l: StaffLink) => (l.exact ? alias === l.href : alias === l.href || alias.startsWith(`${l.href}/`));
   // The most specific match wins (/equipo/global vs /equipo/global/buscar).
   const current = all.filter(isOn).sort((a, b) => b.href.length - a.href.length)[0];

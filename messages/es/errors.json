@@ -43,5 +43,10 @@
   "no_tickets": "Todavía no tienes boletos de recreo. Completa 2 lecciones para ganar uno.",
   "recreo_disabled": "Los recreos están pausados para tu grupo.",
   "invalid_game": "Ese juego no existe.",
-  "no_active_recreo": "Tu recreo ya terminó."
+  "no_active_recreo": "Tu recreo ya terminó.",
+  "course_needs_module": "Para publicar el curso, primero publica al menos uno de sus módulos.",
+  "module_needs_lesson": "Para publicar el módulo, primero publica al menos una de sus lecciones.",
+  "course_in_use": "Ya hay estudiantes con avance en este curso. Solo una fundadora puede eliminarlo; puedes pasarlo a borrador.",
+  "module_in_use": "Ya hay estudiantes con avance en estas lecciones. Solo una fundadora puede borrarlas; elimina el módulo sin borrar sus lecciones.",
+  "lesson_in_use": "Ya hay estudiantes con avance en esta lección. Solo una fundadora puede eliminarla; puedes archivarla."
 }

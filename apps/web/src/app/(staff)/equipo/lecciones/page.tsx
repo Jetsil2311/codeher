@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { getTranslations } from "next-intl/server";
-import { NewLessonForm, ExportCourseButton } from "@/components/staff/LessonLibraryClient";
+import { NewLessonForm } from "@/components/staff/LessonLibraryClient";
+import { ContentTabs } from "@/components/staff/ContentTabs";
 import { PageHead, Panel, TableWrap, td, th } from "@/components/staff/StaffUi";
 import { LanguageBadge, Tag, cx } from "@/components/ui";
 import { lessonLibrary } from "@/server/services/staff";
@@ -18,6 +19,7 @@ export default async function Lecciones({ searchParams }: { searchParams: Promis
   return (
     <>
       <PageHead title={t("title")} subtitle={p.role === "founder" ? t("subtitleFounder") : t("subtitle")} />
+      <ContentTabs active="lessons" lessons={lib.lessons.length} courses={lib.courses.length} />
       <div className="grid gap-6 lg:grid-cols-[1fr_340px]">
         <Panel
           title={t("lessons")}
@@ -46,16 +48,6 @@ export default async function Lecciones({ searchParams }: { searchParams: Promis
         </Panel>
         <div className="space-y-6">
           <Panel title={t("newLesson")}><NewLessonForm modules={modules} founder={p.role === "founder"} /></Panel>
-          <Panel title={t("courses")}>
-            <ul className="space-y-2">
-              {lib.courses.map((c) => (
-                <li key={c.id} className="flex items-center justify-between gap-2 rounded-xl px-3 py-2 ring-1 ring-line">
-                  <span className="text-sm font-semibold">{c.title}</span>
-                  <ExportCourseButton courseId={c.id} slug={c.slug} />
-                </li>
-              ))}
-            </ul>
-          </Panel>
         </div>
       </div>
     </>

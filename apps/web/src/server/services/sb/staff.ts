@@ -240,7 +240,7 @@ export async function createLesson(p: Profile, input: { title: string; slug: str
 
 export async function updateLesson(p: Profile, id: string, patch: Partial<Pick<Lesson, "title" | "summary" | "content_md" | "visibility" | "pair_lesson_id" | "estimated_minutes" | "xp_reward" | "module_id" | "language">>, expectedVersion?: number) {
   const c = await db();
-  const l = ok(await c.from("lessons").select("id,language,visibility,status,version,created_by").eq("id", id).maybeSingle()) as Lesson | null;
+  const l = ok(await c.from("lessons").select("id,module_id,language,visibility,status,version,created_by").eq("id", id).maybeSingle()) as Lesson | null;
   if (!l || !editable(p, l)) throw new AppError("forbidden");
   if (expectedVersion !== undefined && expectedVersion !== l.version) throw new AppError("version_conflict");
   if (patch.language && patch.language !== l.language) {
@@ -248,8 +248,15 @@ export async function updateLesson(p: Profile, id: string, patch: Partial<Pick<L
     if (v.length) throw new AppError("language_locked");
   }
   if ((patch.visibility ?? l.visibility) === "public" && l.status === "published" && p.role !== "founder") throw new AppError("founder_publishes_public");
-  let q = c.from("lessons").update(patch).eq("id", id);
-  if (expectedVersion !== undefined) q = q.eq("version", expectedVersion);
+  // A module change goes through staff_move_lesson first (it keeps positions contiguous).
+  const { module_id: moveTo, ...rest } = patch;
+  let version = expectedVersion;
+  if (moveTo !== undefined && moveTo !== l.module_id) {
+    await call<void>("staff_move_lesson", { p_lesson: id, p_module: moveTo });
+    if (version !== undefined) version += 1;
+  }
+  let q = c.from("lessons").update(rest).eq("id", id);
+  if (version !== undefined) q = q.eq("version", version);
   const rows = ok(await q.select("version")) as { version: number }[];
   if (!rows.length) throw new AppError("version_conflict");
   return rows[0].version;
@@ -346,3 +353,66 @@ export async function profileFromApiKey(token: string): Promise<Profile | null> 
 export const setGroupRecreo = async (_p: Profile, groupId: string, enabled: boolean) => call<void>("staff_set_group_recreo", { p_group: groupId, p_enabled: enabled });
 export const recreoFree = async (_p: Profile, studentIds: string[], minutes: number) => call<number>("staff_recreo_free", { p_students: studentIds, p_minutes: minutes });
 export const groupRecreo = async (_p: Profile, groupId: string) => call<R<typeof L.groupRecreo>>("staff_group_recreo", { p_group: groupId });
+
+// ---------- Course authoring (0010_course_authoring.sql) ----------
+const courseEditable = (p: Profile, c: Row) => p.role === "founder" || c.created_by === p.id;
+type LessonLite = { id: string; slug: string; title: string; language: CodeLanguage; visibility: Lesson["visibility"]; status: Lesson["status"]; created_by: string | null; position: number; module_id: string | null; exercises?: { count: number }[] };
+
+export async function courseList(p: Profile): Promise<R<typeof L.courseList>> {
+  const c = await db();
+  const rows = ok(await c.from("courses").select("id,slug,title,description,status,position,created_by,modules(id,status,lessons(id,language,status,visibility)),group_courses(count)").order("position")) as Row[];
+  return rows.map((x) => {
+    const mods = (x.modules as { id: string; status: string; lessons: { language: CodeLanguage; status: string; visibility: string }[] }[]) ?? [];
+    const lessons = mods.flatMap((m) => m.lessons ?? []);
+    const published = x.status === "published" ? mods.filter((m) => m.status === "published").flatMap((m) => m.lessons ?? []).filter((l) => l.status === "published" && l.visibility !== "draft").length : 0;
+    return {
+      id: x.id as string, slug: x.slug as string, title: x.title as string, description: x.description as string, status: x.status as Lesson["status"],
+      editable: courseEditable(p, x), modules: mods.length, lessons: lessons.length, published,
+      languages: [...new Set(lessons.map((l) => l.language))], groups: ((x.group_courses as { count: number }[] | undefined)?.[0]?.count as number) ?? 0,
+    };
+  });
+}
+
+export async function courseDetail(p: Profile, id: string): Promise<R<typeof L.courseDetail>> {
+  if (!/^[0-9a-f-]{36}$/i.test(id)) return null;
+  const c = await db();
+  const course = ok(await c.from("courses").select("id,slug,title,description,status,created_by").eq("id", id).maybeSingle()) as Row | null;
+  if (!course) return null;
+  const canEdit = courseEditable(p, course);
+  const mods = ok(await c.from("modules").select("id,slug,title,status,position").eq("course_id", id).order("position")) as Row[];
+  const cols = "id,slug,title,language,visibility,status,created_by,position,module_id,exercises(count)";
+  const [lessons, unassigned, usage] = await Promise.all([
+    mods.length ? c.from("lessons").select(cols).in("module_id", mods.map((m) => m.id as string)).order("position") : Promise.resolve({ data: [], error: null }),
+    (() => { let q = c.from("lessons").select(cols).is("module_id", null).order("title"); if (p.role !== "founder") q = q.eq("created_by", p.id); return q; })(),
+    canEdit ? call<{ groups: number; students: number }>("staff_course_usage", { p_course: id }) : Promise.resolve({ groups: 0, students: 0 }),
+  ]);
+  const ls = ok(lessons as { data: unknown; error: null }) as LessonLite[];
+  const lite = (l: LessonLite) => ({ id: l.id, slug: l.slug, title: l.title, language: l.language, visibility: l.visibility, status: l.status });
+  const courseOn = course.status === "published";
+  return {
+    course: { id: course.id as string, slug: course.slug as string, title: course.title as string, description: course.description as string, status: course.status as Lesson["status"], created_by: (course.created_by as string | null) ?? null },
+    editable: canEdit,
+    usage,
+    studentLessons: courseOn ? ls.filter((l) => l.status === "published" && l.visibility !== "draft" && mods.find((m) => m.id === l.module_id)?.status === "published").length : 0,
+    modules: mods.map((m) => ({
+      id: m.id as string, slug: m.slug as string, title: m.title as string, status: m.status as Lesson["status"], position: m.position as number,
+      lessons: ls.filter((l) => l.module_id === m.id).map((l) => ({ ...lite(l), exercises: l.exercises?.[0]?.count ?? 0, editable: editable(p, l) })),
+    })),
+    unassigned: (ok(unassigned) as LessonLite[]).map(lite),
+  };
+}
+
+export const saveCourse = async (_p: Profile, input: { id?: string; slug: string; title: string; description: string; firstModule?: string }) =>
+  call<string>("staff_save_course", { p_id: input.id ?? null, p_slug: input.slug, p_title: input.title, p_description: input.description, p_first_module: input.firstModule ?? null });
+export const setCourseStatus = async (_p: Profile, id: string, status: Lesson["status"]) => call<void>("staff_set_status", { p_entity: "course", p_id: id, p_status: status });
+export const setModuleStatus = async (_p: Profile, id: string, status: Lesson["status"]) => call<void>("staff_set_status", { p_entity: "module", p_id: id, p_status: status });
+export const deleteCourse = async (_p: Profile, id: string, confirm: string, deleteLessons: boolean) =>
+  call<{ deleted: number; detached: number }>("staff_delete_course", { p_id: id, p_confirm: confirm, p_delete_lessons: deleteLessons });
+export const saveModule = async (_p: Profile, input: { id?: string; courseId: string; title: string }) =>
+  call<string>("staff_save_module", { p_id: input.id ?? null, p_course: input.courseId, p_title: input.title });
+export const deleteModule = async (_p: Profile, id: string, deleteLessons: boolean) =>
+  call<{ deleted: number; detached: number }>("staff_delete_module", { p_id: id, p_delete_lessons: deleteLessons });
+export const reorderModules = async (_p: Profile, courseId: string, ids: string[]) => call<void>("reorder_items", { p_table: "modules", p_parent: courseId, p_ordered_ids: ids });
+export const reorderLessons = async (_p: Profile, moduleId: string, ids: string[]) => call<void>("reorder_items", { p_table: "lessons", p_parent: moduleId, p_ordered_ids: ids });
+export const moveLesson = async (_p: Profile, lessonId: string, moduleId: string | null) => call<void>("staff_move_lesson", { p_lesson: lessonId, p_module: moduleId });
+export const deleteLesson = async (_p: Profile, id: string, confirm: string) => call<void>("staff_delete_lesson", { p_id: id, p_confirm: confirm });
