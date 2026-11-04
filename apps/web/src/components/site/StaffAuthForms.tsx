@@ -3,10 +3,10 @@ import Link from "next/link";
 import { useActionState, useState } from "react";
 import { useTranslations } from "next-intl";
 import { ArrowRight, Eye, EyeSlash, GoogleLogo, UserCircle } from "@phosphor-icons/react/dist/ssr";
-import { staffRegisterAction, staffSignInAction } from "@/app/actions/staff";
+import { staffGoogleAction, staffRegisterAction, staffSignInAction } from "@/app/actions/staff";
 import { Field, inputClass } from "@/components/ui";
 
-export function StaffSignInForm({ googleEnabled, demo }: { googleEnabled: boolean; demo?: { label: string; email: string; password: string }[] }) {
+export function StaffSignInForm({ googleEnabled, demo, authError }: { googleEnabled: boolean; demo?: { label: string; email: string; password: string }[]; authError?: boolean }) {
   const t = useTranslations("staff.auth");
   const te = useTranslations("errors");
   const [state, action, pending] = useActionState(staffSignInAction, {});
@@ -17,9 +17,12 @@ export function StaffSignInForm({ googleEnabled, demo }: { googleEnabled: boolea
     <>
     <div className="tile relative space-y-5 overflow-hidden rounded-[1.75rem] p-6 md:p-8">
       <span className="absolute inset-x-0 top-0 h-1.5 bg-grad" aria-hidden />
-      <button type="button" disabled={!googleEnabled} className="inline-flex h-12 w-full items-center justify-center gap-2 rounded-full bg-white font-semibold text-ink ring-1 ring-ink/15 transition hover:bg-violet-50 disabled:opacity-50" aria-describedby={googleEnabled ? undefined : "google-note"}>
-        <GoogleLogo size={20} weight="bold" aria-hidden /> {t("google")}
-      </button>
+      {authError ? <p role="alert" className="rounded-2xl bg-pink-100 px-4 py-3 text-sm font-medium">{te("auth_failed")}</p> : null}
+      <form action={staffGoogleAction}>
+        <button type="submit" disabled={!googleEnabled} className="inline-flex h-12 w-full items-center justify-center gap-2 rounded-full bg-white font-semibold text-ink ring-1 ring-ink/15 transition hover:bg-violet-50 disabled:opacity-50" aria-describedby={googleEnabled ? undefined : "google-note"}>
+          <GoogleLogo size={20} weight="bold" aria-hidden /> {t("google")}
+        </button>
+      </form>
       {!googleEnabled && <p id="google-note" className="-mt-3 text-center text-xs text-ink-muted">{t("googleLocal")}</p>}
       <div className="flex items-center gap-3 text-xs font-semibold text-ink-muted">
         <span className="h-px flex-1 bg-line" /> {t("or")} <span className="h-px flex-1 bg-line" />
@@ -77,6 +80,7 @@ export function StaffRegisterForm() {
     return (
       <div role="status" className="tile p-8 text-center">
         <p className="text-xl font-bold">{state.role === "pending" ? t("registeredPending") : t("registered")}</p>
+        {state.confirm ? <p className="mt-2 text-ink-soft">{t("registeredConfirm")}</p> : null}
         <Link href="/equipo" className="mt-4 inline-block font-semibold text-violet-700 underline">{t("goSignIn")}</Link>
       </div>
     );

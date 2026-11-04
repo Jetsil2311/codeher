@@ -12,7 +12,7 @@ export async function signInAction(_prev: unknown, form: FormData): Promise<{ er
   const code = String(form.get("code") ?? "");
   const pin = String(form.get("pin") ?? "");
   if (!code.trim() || !/^\d{4}$/.test(pin)) return { error: "invalid" };
-  const res = S.signIn(code, pin, await clientIp());
+  const res = await S.signIn(code, pin, await clientIp());
   if (!res.ok) return { error: res.error };
   await setSessionCookie(STUDENT_COOKIE, res.token, res.hours);
   redirect("/app");
@@ -67,7 +67,7 @@ export async function newBlankProjectAction(form: FormData) {
   const language = z.enum(["python", "pseudocode_es"]).parse(form.get("language"));
   const name = String(form.get("name") ?? "").trim() || "Mi proyecto";
   const starter = language === "python" ? "# Escribe tu programa aquí\nprint(\"¡Hola!\")\n" : 'Proceso MiProyecto\n    Escribir "¡Hola!";\nFinProceso\n';
-  const id = S.createProject(s, name, language, starter, null);
+  const id = await S.createProject(s, name, language, starter, null);
   redirect(`/app/proyectos/${id}`);
 }
 
@@ -122,6 +122,6 @@ export async function changePinAction(_prev: unknown, form: FormData): Promise<{
   const next = String(form.get("next") ?? "");
   if (next !== String(form.get("confirm") ?? "")) return { error: "pin_mismatch" };
   if (!/^\d{4}$/.test(next)) return { error: "pin_format" };
-  const res = S.changePin(s, current, next);
+  const res = await S.changePin(s, current, next);
   return res.ok ? { ok: true } : { error: res.error };
 }

@@ -11,7 +11,8 @@ export async function generateMetadata(): Promise<Metadata> {
   return { title: (await getTranslations("staff.auth"))("metaTitle") };
 }
 
-export default async function EquipoSignIn() {
+export default async function EquipoSignIn({ searchParams }: { searchParams: Promise<{ error?: string }> }) {
+  const { error } = await searchParams;
   if (await currentStaff()) redirect("/equipo/panel");
   const t = await getTranslations("staff.auth");
   const local = (process.env.DATA_MODE ?? "local") === "local";
@@ -47,6 +48,7 @@ export default async function EquipoSignIn() {
         <div className="mx-auto w-full max-w-md lg:max-w-none">
           <StaffSignInForm
             googleEnabled={!local}
+            authError={error === "auth"}
             demo={local ? [
               { label: t("demoFounder"), email: DEMO.founder.email, password: DEMO.founder.password },
               { label: t("demoEducator"), email: DEMO.educator.email, password: DEMO.educator.password },

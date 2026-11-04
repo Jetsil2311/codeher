@@ -8,7 +8,7 @@ import { requireStaff } from "@/server/session";
 
 export default async function PanelPage() {
   const p = await requireStaff();
-  const d = dashboard(p);
+  const d = await dashboard(p);
   const t = await getTranslations("staff.panel");
   const tc = await getTranslations("common");
   return (

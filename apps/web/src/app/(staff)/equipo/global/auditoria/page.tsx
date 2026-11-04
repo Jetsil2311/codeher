@@ -6,7 +6,7 @@ import { requireFounder } from "@/server/session";
 
 export default async function Auditoria() {
   const p = await requireFounder();
-  const rows = audit(p);
+  const rows = await audit(p);
   const t = await getTranslations("staff.audit");
   const fmt = new Intl.DateTimeFormat("es-MX", { dateStyle: "short", timeStyle: "medium", timeZone: "America/Mexico_City" });
   return (

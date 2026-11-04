@@ -1,13 +1,13 @@
 import { getTranslations } from "next-intl/server";
 import { PageHead } from "@/components/staff/StaffUi";
 import { NewGroupWizard } from "@/components/staff/NewGroupWizard";
-import { read } from "@/server/db/store";
+import { activeCommunities } from "@/server/services/public";
 import { requireStaff } from "@/server/session";
 
 export default async function NuevoGrupo() {
   await requireStaff();
   const t = await getTranslations("staff.newGroup");
-  const communities = read((db) => db.communities.filter((c) => c.active).map((c) => ({ id: c.id, name: c.name })));
+  const communities = await activeCommunities();
   const now = new Date();
   return (
     <>

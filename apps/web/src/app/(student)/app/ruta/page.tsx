@@ -8,7 +8,7 @@ import { requireStudent } from "@/server/session";
 
 export default async function Ruta() {
   const s = await requireStudent();
-  const courses = path(s);
+  const courses = await path(s);
   const t = await getTranslations("student.path");
   const tl = await getTranslations("learn.language");
   const langLabels = { python: tl("python"), pseudocode_es: tl("pseudocode_es") };

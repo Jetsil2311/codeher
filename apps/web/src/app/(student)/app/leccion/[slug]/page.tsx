@@ -7,12 +7,12 @@ import { requireStudent } from "@/server/session";
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
   const s = await requireStudent();
-  return { title: getLesson(s, (await params).slug)?.title ?? "Lección" };
+  return { title: (await getLesson(s, (await params).slug))?.title ?? "Lección" };
 }
 
 export default async function Leccion({ params }: { params: Promise<{ slug: string }> }) {
   const s = await requireStudent();
-  const data = getLesson(s, (await params).slug);
+  const data = await getLesson(s, (await params).slug);
   if (!data) notFound();
   async function saveProject(code: string, title: string) {
     "use server";

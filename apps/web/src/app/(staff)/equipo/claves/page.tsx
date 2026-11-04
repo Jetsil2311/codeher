@@ -13,7 +13,7 @@ export default async function Claves() {
   return (
     <>
       <PageHead title={t("title")} subtitle={t("subtitle")} />
-      <ApiKeys keys={listApiKeys(p)} origin={origin} />
+      <ApiKeys keys={await listApiKeys(p)} origin={origin} />
     </>
   );
 }

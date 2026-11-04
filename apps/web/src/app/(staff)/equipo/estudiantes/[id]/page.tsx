@@ -10,7 +10,7 @@ import { requireStaff } from "@/server/session";
 
 export default async function Estudiante({ params }: { params: Promise<{ id: string }> }) {
   const p = await requireStaff();
-  const s = studentDetail(p, (await params).id);
+  const s = await studentDetail(p, (await params).id);
   if (!s) notFound();
   const t = await getTranslations("staff.student");
   const tl = await getTranslations("learn.language");

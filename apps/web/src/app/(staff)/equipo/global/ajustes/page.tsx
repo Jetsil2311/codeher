@@ -6,7 +6,7 @@ import { requireFounder } from "@/server/session";
 
 export default async function Ajustes() {
   const p = await requireFounder();
-  const s = settings(p);
+  const s = await settings(p);
   const t = await getTranslations("staff.settings");
   return (<><PageHead title={t("title")} subtitle={t("subtitle")} /><SettingsForm settings={s.settings} communities={s.communities} /></>);
 }

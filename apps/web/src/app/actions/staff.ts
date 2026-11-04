@@ -10,16 +10,22 @@ import { clearSession, requireFounder, requireStaff, setSessionCookie, STAFF_COO
 import * as T from "@/server/services/staff";
 
 export async function staffSignInAction(_prev: unknown, form: FormData): Promise<{ error?: string }> {
-  const res = T.staffSignIn(String(form.get("email") ?? ""), String(form.get("password") ?? ""));
+  const res = await T.staffSignIn(String(form.get("email") ?? ""), String(form.get("password") ?? ""));
   if (!res.ok) return { error: res.error };
-  await setSessionCookie(STAFF_COOKIE, res.token, 12);
+  // Supabase Auth already set its own cookies; local mode signs our own.
+  if (res.token) await setSessionCookie(STAFF_COOKIE, res.token, 12);
   redirect("/equipo/panel");
 }
 
-export async function staffRegisterAction(_prev: unknown, form: FormData): Promise<{ error?: string; role?: string }> {
+export async function staffRegisterAction(_prev: unknown, form: FormData): Promise<{ error?: string; role?: string; confirm?: boolean }> {
   const res = await attempt(() => T.staffRegister(String(form.get("name") ?? ""), String(form.get("email") ?? ""), String(form.get("password") ?? "")));
   if (!res.ok) return { error: res.error };
-  return { role: res.data.role };
+  // Supabase Auth sends a confirmation email before the first sign-in.
+  return { role: res.data.role, confirm: process.env.DATA_MODE === "supabase" };
+}
+
+export async function staffGoogleAction() {
+  redirect(await T.googleSignInUrl());
 }
 
 export async function staffSignOutAction() {
@@ -32,13 +38,13 @@ const studentListSchema = z.array(z.object({ nickname: z.string().trim().min(1).
 
 export async function suggestGroupAction(year: number, month: number) {
   const p = await requireStaff();
-  return T.suggestGroup(p, year, month);
+  return await T.suggestGroup(p, year, month);
 }
 
 export async function previewGroupAction(input: { year: number; month: number; letter: string | null; names: string }) {
   await requireStaff();
   const names = parseNameList(input.names);
-  return T.previewCodes(input.year, input.month, input.letter ? input.letter.toUpperCase() : null, names);
+  return await T.previewCodes(input.year, input.month, input.letter ? input.letter.toUpperCase() : null, names);
 }
 
 export async function createGroupAction(input: { year: number; month: number; letter: string | null; communityId: string; endsOn: string | null; label: string; students: { nickname: string; pin?: string }[] }) {
@@ -206,7 +212,7 @@ export async function upsertCommunityAction(input: { id?: string; name: string; 
 
 export async function searchAction(q: string) {
   const p = await requireFounder();
-  return T.search(p, q);
+  return await T.search(p, q);
 }
 
 // ---------- Authoring ----------
@@ -291,9 +297,9 @@ export async function duplicateLessonAction(id: string) {
 
 export async function saveDeckAction(lessonId: string, title: string, json: string, status: "draft" | "published") {
   const p = await requireStaff();
-  return attempt(() => {
+  return attempt(async () => {
     const deck = slideDeckV1Schema.parse(JSON.parse(json));
-    T.saveDeck(p, lessonId, title, deck, status);
+    await T.saveDeck(p, lessonId, title, deck, status);
     revalidatePath(`/equipo/lecciones/${lessonId}`);
   });
 }

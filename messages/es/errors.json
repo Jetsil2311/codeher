@@ -37,5 +37,7 @@
   "trivial_pin": "Ese PIN es muy fácil de adivinar. Evita 1234, 0000 o números repetidos.",
   "pin_mismatch": "Los PIN nuevos no coinciden.",
   "pin_format": "El PIN debe tener 4 números.",
-  "unexpected": "Algo salió mal. Inténtalo de nuevo."
+  "unexpected": "Algo salió mal. Inténtalo de nuevo.",
+  "email_not_confirmed": "Confirma tu correo primero: te enviamos un enlace al crear tu cuenta.",
+  "auth_failed": "No pudimos completar el acceso con Google. Intenta de nuevo."
 }

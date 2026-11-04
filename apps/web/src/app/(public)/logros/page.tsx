@@ -20,7 +20,7 @@ export default async function Logros({ searchParams }: { searchParams: Promise<{
   const t = await getTranslations("landing.logrosPage");
   const tk = await getTranslations("landing.logros.kind");
   const sp = await searchParams;
-  const all = logros();
+  const all = await logros();
   const years = Array.from(new Set(all.map((a) => a.year).filter(Boolean))).sort() as number[];
   const communities = Array.from(new Set(all.map((a) => a.community).filter(Boolean))) as string[];
   const items = all.filter((a) => (!sp.anio || String(a.year) === sp.anio) && (!sp.comunidad || a.community === sp.comunidad) && (!sp.tipo || a.kind === sp.tipo));

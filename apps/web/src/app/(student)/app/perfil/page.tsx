@@ -6,7 +6,7 @@ import { requireStudent } from "@/server/session";
 
 export default async function Perfil() {
   const s = await requireStudent();
-  const h = home(s);
+  const h = await home(s);
   const t = await getTranslations("student.profile");
   return (
     <div className="mx-auto max-w-3xl px-4 pt-6 md:pt-10">

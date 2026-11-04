@@ -9,11 +9,11 @@ import { logro } from "@/server/services/public";
 
 export const dynamic = "force-dynamic";
 export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
-  return { title: logro((await params).id)?.title ?? "Logro" };
+  return { title: (await logro((await params).id))?.title ?? "Logro" };
 }
 
 export default async function LogroDetail({ params }: { params: Promise<{ id: string }> }) {
-  const item = logro((await params).id);
+  const item = await logro((await params).id);
   if (!item) notFound();
   const t = await getTranslations("landing.logrosPage");
   const tk = await getTranslations("landing.logros");

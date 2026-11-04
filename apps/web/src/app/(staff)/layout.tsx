@@ -34,7 +34,7 @@ export default async function StaffLayout({ children }: { children: React.ReactN
     ...(founder ? [{ title: t("founderOnly"), links: global }] : []),
   ];
   return (
-    <ErrorCatalogProvider rows={errorCatalog()}>
+    <ErrorCatalogProvider rows={await errorCatalog()}>
       <StaffShell
         sections={sections}
         dock={program.slice(0, 3)}

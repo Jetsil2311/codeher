@@ -9,7 +9,7 @@ import { requireStaff } from "@/server/session";
 
 export default async function Grupo({ params }: { params: Promise<{ id: string }> }) {
   const p = await requireStaff();
-  const g = groupDetail(p, (await params).id);
+  const g = await groupDetail(p, (await params).id);
   if (!g) notFound();
   const t = await getTranslations("staff.group");
   const tc = await getTranslations("common");

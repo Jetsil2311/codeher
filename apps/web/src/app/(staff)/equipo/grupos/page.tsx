@@ -8,7 +8,7 @@ import { requireStaff } from "@/server/session";
 
 export default async function Grupos() {
   const p = await requireStaff();
-  const groups = listGroups(p);
+  const groups = await listGroups(p);
   const t = await getTranslations("staff.groups");
   return (
     <>

@@ -4,7 +4,7 @@ import { logros, publicLessons } from "@/server/services/public";
 
 export const dynamic = "force-dynamic";
 
-export default function sitemap(): MetadataRoute.Sitemap {
+export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const now = new Date();
   const fixed = [
     { path: "/", priority: 1 },
@@ -16,7 +16,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
   ];
   return [
     ...fixed.map((f) => ({ url: `${SITE_URL}${f.path}`, lastModified: now, changeFrequency: "weekly" as const, priority: f.priority })),
-    ...publicLessons().map((l) => ({ url: `${SITE_URL}/probar/${l.slug}`, lastModified: now, changeFrequency: "monthly" as const, priority: 0.7 })),
-    ...logros().filter((a) => a.has_code).map((a) => ({ url: `${SITE_URL}/logros/${a.id}`, lastModified: now, changeFrequency: "monthly" as const, priority: 0.5 })),
+    ...(await publicLessons()).map((l) => ({ url: `${SITE_URL}/probar/${l.slug}`, lastModified: now, changeFrequency: "monthly" as const, priority: 0.7 })),
+    ...(await logros()).filter((a) => a.has_code).map((a) => ({ url: `${SITE_URL}/logros/${a.id}`, lastModified: now, changeFrequency: "monthly" as const, priority: 0.5 })),
   ];
 }

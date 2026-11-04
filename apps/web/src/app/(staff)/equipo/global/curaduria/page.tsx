@@ -7,5 +7,5 @@ import { requireFounder } from "@/server/session";
 export default async function Curaduria() {
   const p = await requireFounder();
   const t = await getTranslations("staff.logros");
-  return (<><PageHead title={t("curationTitle")} subtitle={t("curationSubtitle")} /><LogrosQueue items={JSON.parse(JSON.stringify(listLogros(p)))} founder /></>);
+  return (<><PageHead title={t("curationTitle")} subtitle={t("curationSubtitle")} /><LogrosQueue items={JSON.parse(JSON.stringify(await listLogros(p)))} founder /></>);
 }

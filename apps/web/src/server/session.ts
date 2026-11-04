@@ -1,9 +1,13 @@
 import "server-only";
 import { cookies, headers } from "next/headers";
 import { redirect } from "next/navigation";
+import { cache as reactCache } from "react";
 import { randomToken, sha256, sign, unsign } from "./crypto";
 import { read, write, now } from "./db/store";
 import type { Db, Profile, Student } from "./db/types";
+import { SUPABASE } from "./supabase";
+import { me as sbStudent, signOut as sbStudentSignOut } from "./services/sb/student";
+import { currentProfile as sbProfile, staffSignOut as sbStaffSignOut } from "./services/sb/staff";
 
 // Signed, httpOnly session cookies with limited lifetime (brief 4.4). Tokens are stored
 // hashed, so revoking a session or deactivating a code ends it immediately.
@@ -36,6 +40,12 @@ export async function setSessionCookie(name: string, token: string, hours: numbe
 export async function clearSession(name: string) {
   const jar = await cookies();
   const token = unsign(jar.get(name)?.value);
+  if (SUPABASE) {
+    if (name === STUDENT_COOKIE && token) await sbStudentSignOut(token).catch(() => undefined);
+    if (name === STAFF_COOKIE) await sbStaffSignOut().catch(() => undefined);
+    jar.delete(name);
+    return;
+  }
   if (token) {
     const [kind, subject] = token.split("~");
     write((db) => {
@@ -65,6 +75,8 @@ function studentActive(db: Db, st: Student): boolean {
 export async function currentStudent(): Promise<Student | null> {
   const jar = await cookies();
   const token = unsign(jar.get(STUDENT_COOKIE)?.value);
+  // Supabase: the token is checked (and last activity recorded) by student_me.
+  if (SUPABASE) return token ? studentOnce(token) : null;
   const found = read((db) => {
     const s = findSession(db, "student", token);
     if (!s) return null;
@@ -80,6 +92,10 @@ export async function currentStudent(): Promise<Student | null> {
   return found;
 }
 
+// One lookup per request even when the layout and the page both ask for the session.
+const studentOnce = reactCache((token: string) => sbStudent(token));
+const staffOnce = reactCache(() => sbProfile());
+
 export async function requireStudent(): Promise<Student> {
   const s = await currentStudent();
   if (!s) redirect("/entrar");
@@ -87,6 +103,7 @@ export async function requireStudent(): Promise<Student> {
 }
 
 export async function currentStaff(): Promise<Profile | null> {
+  if (SUPABASE) return staffOnce();
   const jar = await cookies();
   const token = unsign(jar.get(STAFF_COOKIE)?.value);
   return read((db) => {

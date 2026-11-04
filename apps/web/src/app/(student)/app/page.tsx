@@ -22,7 +22,7 @@ const BADGE_TONES = ["from-violet to-pink", "from-pink to-[#ff9f6b]", "from-[#00
 
 export default async function Inicio() {
   const s = await requireStudent();
-  const h = home(s);
+  const h = await home(s);
   const t = await getTranslations("student.home");
   const tl = await getTranslations("learn.language");
   const tb = await getTranslations("student.badges");

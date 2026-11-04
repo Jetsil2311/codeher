@@ -7,5 +7,5 @@ import { requireFounder } from "@/server/session";
 export default async function Educadores() {
   const p = await requireFounder();
   const t = await getTranslations("staff.educators");
-  return (<><PageHead title={t("title")} subtitle={t("subtitle")} /><EducatorsManager dir={staffDirectory(p)} selfId={p.id} /></>);
+  return (<><PageHead title={t("title")} subtitle={t("subtitle")} /><EducatorsManager dir={await staffDirectory(p)} selfId={p.id} /></>);
 }

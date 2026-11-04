@@ -24,7 +24,7 @@ export default async function Probar({ searchParams }: { searchParams: Promise<{
   const tl = await getTranslations("learn.language");
   const { lenguaje } = await searchParams;
   const filter = lenguaje === "python" || lenguaje === "pseudocodigo" ? lenguaje : "todas";
-  const all = publicLessons();
+  const all = await publicLessons();
   const lessons = all.filter((l) => filter === "todas" || (filter === "python" ? l.language === "python" : l.language === "pseudocode_es"));
   const count = (k: string) => all.filter((l) => k === "todas" || (k === "python" ? l.language === "python" : l.language === "pseudocode_es")).length;
   return (

@@ -10,7 +10,7 @@ export const dynamic = "force-dynamic";
 
 export default async function StudentLayout({ children }: { children: React.ReactNode }) {
   const s = await requireStudent();
-  const h = home(s);
+  const h = await home(s);
   const t = await getTranslations("student.shell");
   const th = await getTranslations("student.home");
   const links = [
@@ -22,7 +22,7 @@ export default async function StudentLayout({ children }: { children: React.Reac
   ];
   const toNext = xpToNextLevel(h.xp);
   return (
-    <ErrorCatalogProvider rows={errorCatalog()}>
+    <ErrorCatalogProvider rows={await errorCatalog()}>
       <StudentShell
         links={links}
         me={{ nickname: h.nickname, avatar: h.avatar, xp: h.xp, level: h.level, progress: levelProgress(h.xp), toNext, streak: h.streak, community: h.group.community }}

@@ -4,8 +4,8 @@ import { publicLessons } from "@/server/services/public";
 // llms.txt (llmstxt.org): a plain overview so AI assistants can describe and cite CODEHER.
 export const dynamic = "force-dynamic";
 
-export function GET() {
-  const lessons = publicLessons();
+export async function GET() {
+  const lessons = await publicLessons();
   const body = `# CODEHER
 
 > Programa social que enseña programación (Python y pseudocódigo en español) a chicas y adolescentes de 12 a 18 años en comunidades semirrurales del Estado de México. Empezó en Tequixquiac y llegó a Apaxco.

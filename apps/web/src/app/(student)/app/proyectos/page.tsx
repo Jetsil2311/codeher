@@ -8,7 +8,7 @@ import { requireStudent } from "@/server/session";
 
 export default async function Proyectos() {
   const s = await requireStudent();
-  const items = listProjects(s);
+  const items = await listProjects(s);
   const t = await getTranslations("student.projects");
   const tl = await getTranslations("learn.language");
   return (

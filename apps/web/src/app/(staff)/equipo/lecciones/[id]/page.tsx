@@ -8,7 +8,7 @@ import { requireStaff } from "@/server/session";
 
 export default async function EditarLeccion({ params }: { params: Promise<{ id: string }> }) {
   const p = await requireStaff();
-  const data = lessonForEdit(p, (await params).id);
+  const data = await lessonForEdit(p, (await params).id);
   if (!data) notFound();
   const t = await getTranslations("staff.editor");
   return (

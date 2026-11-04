@@ -10,7 +10,7 @@ export default async function LogrosStaff() {
   return (
     <>
       <PageHead title={t("title")} subtitle={p.role === "founder" ? t("subtitleFounder") : t("subtitle")} />
-      <LogrosQueue items={JSON.parse(JSON.stringify(listLogros(p)))} founder={p.role === "founder"} />
+      <LogrosQueue items={JSON.parse(JSON.stringify(await listLogros(p)))} founder={p.role === "founder"} />
     </>
   );
 }

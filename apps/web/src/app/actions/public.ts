@@ -4,7 +4,7 @@ import { attempt } from "@/server/errors";
 import { checkPublicAnswer } from "@/server/services/public";
 
 export async function checkPublicAnswerAction(exerciseId: string, answer: { choices?: number[]; text?: string }) {
-  return attempt(() => ({ ...checkPublicAnswer(z.string().uuid().parse(exerciseId), answer), xp_awarded: 0, lesson_completed: false, lesson_xp: 0, xp: 0, streak: 0 }));
+  return attempt(async () => ({ ...(await checkPublicAnswer(z.string().uuid().parse(exerciseId), answer)), xp_awarded: 0, lesson_completed: false, lesson_xp: 0, xp: 0, streak: 0 }));
 }
 
 export async function contactAction(_prev: unknown, form: FormData): Promise<{ ok?: boolean; error?: string }> {
@@ -16,7 +16,13 @@ export async function contactAction(_prev: unknown, form: FormData): Promise<{ o
   });
   const parsed = schema.safeParse(Object.fromEntries(form));
   if (!parsed.success) return { error: "contact_invalid" };
-  // Local mode: requests are logged for the founders; production sends an email.
+  // Requests land in the access log for the founders (Supabase: via the server-only secret key).
+  if (process.env.DATA_MODE === "supabase") {
+    const { adminClient } = await import("@/server/supabase");
+    const { error } = await adminClient().from("access_log").insert({ actor_kind: "system", action: "contact_request", entity_type: "contact", payload: parsed.data });
+    if (error) return { error: "unexpected" };
+    return { ok: true };
+  }
   const { write, now, nextSeq } = await import("@/server/db/store");
   write((db) => {
     db.access_log.push({ id: nextSeq(db), actor_kind: "system", actor_id: null, action: "contact_request", entity_type: "contact", entity_id: null, payload: parsed.data, created_at: now() });

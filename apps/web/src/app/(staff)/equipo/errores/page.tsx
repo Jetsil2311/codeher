@@ -10,7 +10,7 @@ export default async function Errores() {
   return (
     <>
       <PageHead title={t("title")} subtitle={t("subtitle")} />
-      <ErrorCatalogEditor rows={JSON.parse(JSON.stringify(errorCatalogAll()))} />
+      <ErrorCatalogEditor rows={JSON.parse(JSON.stringify(await errorCatalogAll()))} />
     </>
   );
 }

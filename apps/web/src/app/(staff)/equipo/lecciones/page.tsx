@@ -8,7 +8,7 @@ import { requireStaff } from "@/server/session";
 
 export default async function Lecciones({ searchParams }: { searchParams: Promise<{ lenguaje?: string }> }) {
   const p = await requireStaff();
-  const lib = lessonLibrary(p);
+  const lib = await lessonLibrary(p);
   const t = await getTranslations("staff.library");
   const tl = await getTranslations("learn.language");
   const { lenguaje } = await searchParams;

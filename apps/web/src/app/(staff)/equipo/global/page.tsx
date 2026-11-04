@@ -8,11 +8,11 @@ import { requireFounder } from "@/server/session";
 
 export default async function Global({ searchParams }: { searchParams: Promise<{ anio?: string; mes?: string; comunidad?: string; educadora?: string }> }) {
   const p = await requireFounder();
-  const s = stats(p);
+  const s = await stats(p);
   const t = await getTranslations("staff.global");
   const tl = await getTranslations("learn.language");
   const sp = await searchParams;
-  const all = listGroups(p);
+  const all = await listGroups(p);
   const groups = all.filter((g) => (!sp.anio || String(g.year) === sp.anio) && (!sp.mes || String(g.month) === sp.mes) && (!sp.comunidad || g.community === sp.comunidad) && (!sp.educadora || g.educators.some((e) => e.id === sp.educadora)));
   const years = [...new Set(all.map((g) => g.year))].sort();
   const months = [...new Set(all.map((g) => g.month))].sort((a, b) => a - b);

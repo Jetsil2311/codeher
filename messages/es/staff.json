@@ -34,7 +34,8 @@
     "perk2": "Avance en tiempo real",
     "perk2Body": "Quién practicó esta semana y en qué ejercicio va cada una.",
     "perk3": "Logros y lecciones",
-    "perk3Body": "Edita lecciones y propone proyectos para el muro de Logros."
+    "perk3Body": "Edita lecciones y propone proyectos para el muro de Logros.",
+    "registeredConfirm": "Te enviamos un correo para confirmar tu cuenta. Abre el enlace y después entra."
   },
   "shell": {
     "nav": "Navegación del equipo",

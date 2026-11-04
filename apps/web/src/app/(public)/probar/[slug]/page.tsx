@@ -7,13 +7,13 @@ import { SITE_URL } from "@/lib/site";
 
 export const dynamic = "force-dynamic";
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
-  const l = publicLesson((await params).slug);
+  const l = await publicLesson((await params).slug);
   if (!l) return { title: "Lección" };
   return { title: l.title, description: l.summary, alternates: { canonical: `/probar/${l.slug}` }, openGraph: { title: l.title, description: l.summary, type: "article" } };
 }
 
 export default async function ProbarLesson({ params }: { params: Promise<{ slug: string }> }) {
-  const lesson = publicLesson((await params).slug);
+  const lesson = await publicLesson((await params).slug);
   if (!lesson) notFound();
   const ld = {
     "@context": "https://schema.org",

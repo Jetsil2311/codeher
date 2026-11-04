@@ -23,7 +23,7 @@ FinProceso`;
 
 export default async function Landing() {
   const t = await getTranslations("landing");
-  const data = landing();
+  const data = await landing();
   const faq = t.raw("faq.items") as { q: string; a: string }[];
   const jsonLd = {
     "@context": "https://schema.org",
